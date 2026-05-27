@@ -17,23 +17,5 @@ public static class WebApplicationExtensions
         return app;
     }
 
-    /// <summary>
-    /// Enables Swagger UI in the Development environment.
-    /// </summary>
-    public static WebApplication UseSwaggerInDevelopment(
-        this WebApplication app,
-        string endpointTitle = "API v1",
-        string routePrefix   = "swagger")
-    {
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI(options =>
-            {
-                options.SwaggerEndpoint("/swagger/v1/swagger.json", endpointTitle);
-                options.RoutePrefix = routePrefix;
-            });
-        }
-        return app;
-    }
+
 }

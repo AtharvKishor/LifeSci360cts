@@ -4,6 +4,7 @@ using AuthService.Helpers;
 using AuthService.Repositories;
 using AuthService.Services;
 using Microsoft.EntityFrameworkCore;
+using AuthService.Extensions;
 using Shared.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);

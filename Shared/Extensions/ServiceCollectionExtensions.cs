@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using Shared.Filters;
 using System.Text;
 
@@ -36,54 +35,6 @@ public static class ServiceCollectionExtensions
             });
 
         services.AddAuthorization();
-        return services;
-    }
-
-    /// <summary>
-    /// Registers Swagger/OpenAPI with a Bearer token security definition.
-    /// </summary>
-    public static IServiceCollection AddSwaggerWithJwt(
-        this IServiceCollection services,
-        string title,
-        string version     = "v1",
-        string description = "")
-    {
-        services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen(options =>
-        {
-            options.SwaggerDoc(version, new OpenApiInfo
-            {
-                Title       = title,
-                Version     = version,
-                Description = description
-            });
-
-            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Name         = "Authorization",
-                Type         = SecuritySchemeType.Http,
-                Scheme       = "bearer",
-                BearerFormat = "JWT",
-                In           = ParameterLocation.Header,
-                Description  = "Enter your JWT token. Example: eyJhbGci..."
-            });
-
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id   = "Bearer"
-                        }
-                    },
-                    Array.Empty<string>()
-                }
-            });
-        });
-
         return services;
     }
 
