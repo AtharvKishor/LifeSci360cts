@@ -1,0 +1,103 @@
+{
+    "Routes": [
+        {
+            "DownstreamPathTemplate": "/api/patients/{everything}",
+            "DownstreamScheme": "https",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7092
+                }
+            ],
+            "UpstreamPathTemplate": "/api/patients/{everything}",
+            "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/patients",
+            "DownstreamScheme": "https",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7092
+                }
+            ],
+            "UpstreamPathTemplate": "/api/patients",
+            "UpstreamHttpMethod": [ "GET", "POST" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/enrollments/{everything}",
+            "DownstreamScheme": "https",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7092
+                }
+            ],
+            "UpstreamPathTemplate": "/api/enrollments/{everything}",
+            "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/enrollments",
+            "DownstreamScheme": "https",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7092
+                }
+            ],
+            "UpstreamPathTemplate": "/api/enrollments",
+            "UpstreamHttpMethod": [ "GET", "POST" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/visits/{everything}",
+            "DownstreamScheme": "https",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7092
+                }
+            ],
+            "UpstreamPathTemplate": "/api/visits/{everything}",
+            "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/visits",
+            "DownstreamScheme": "https",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7092
+                }
+            ],
+            "UpstreamPathTemplate": "/api/visits",
+            "UpstreamHttpMethod": [ "GET", "POST" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/visit-review/{everything}",
+            "DownstreamScheme": "https",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7092
+                }
+            ],
+            "UpstreamPathTemplate": "/api/visit-review/{everything}",
+            "UpstreamHttpMethod": [ "GET", "POST", "PUT" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/visit-review",
+            "DownstreamScheme": "https",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7092
+                }
+            ],
+            "UpstreamPathTemplate": "/api/visit-review",
+            "UpstreamHttpMethod": [ "GET", "POST" ]
+        }
+    ],
+    "GlobalConfiguration": {
+        "BaseUrl": "https://localhost:7206"
+    }
+}
