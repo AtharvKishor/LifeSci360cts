@@ -8,7 +8,7 @@
       "applicationUrl": "http://localhost:5081",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }//gateway runs on port 5081
+      }
     },
     "https": {
       "commandName": "Project",
@@ -19,5 +19,5 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
-  }
+}
 }
