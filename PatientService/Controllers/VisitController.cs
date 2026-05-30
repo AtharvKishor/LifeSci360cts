@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PatientService.Services;
-using Shared;
+using Shared.CL;
 using Shared.DTOs;
 
 namespace PatientService.Controllers;
@@ -21,7 +21,7 @@ public class VisitController : ControllerBase
         Guid enrollmentId)
     {
         var result = await _service.GetByEnrollmentAsync(enrollmentId);
-        return Ok(ApiResponse<object>.Ok(result));
+        return Ok(ApiResponse<object>.Success(result));
     }
 
     [HttpGet]
@@ -31,7 +31,7 @@ public class VisitController : ControllerBase
         [FromQuery] string? status)
     {
         var result = await _service.GetFilteredAsync(date, protocolSiteId, status);
-        return Ok(ApiResponse<IEnumerable<VisitDto>>.Ok(result));
+        return Ok(ApiResponse<IEnumerable<VisitDto>>.Success(result));
     }
 
     [HttpPost]
@@ -44,7 +44,7 @@ public class VisitController : ControllerBase
         if (!success)
             return NotFound(ApiResponse<VisitDto>.Fail(error!));
 
-        return Ok(ApiResponse<VisitDto>.Ok(data!, "Visit added."));
+        return Ok(ApiResponse<VisitDto>.Success(data!, "Visit added."));
     }
 
     [HttpPut("{id:guid}/reschedule")]
@@ -56,7 +56,7 @@ public class VisitController : ControllerBase
         if (!success)
             return NotFound(ApiResponse<VisitDto>.Fail(error!));
 
-        return Ok(ApiResponse<VisitDto>.Ok(data!, "Visit rescheduled."));
+        return Ok(ApiResponse<VisitDto>.Success(data!, "Visit rescheduled."));
     }
 
     [HttpPut("{id:guid}/cancel")]
@@ -67,7 +67,7 @@ public class VisitController : ControllerBase
         if (!success)
             return NotFound(ApiResponse<string>.Fail(error!));
 
-        return Ok(ApiResponse<string>.Ok("CANCELLED",
+        return Ok(ApiResponse<string>.Success("CANCELLED",
             "Visit cancelled. Record preserved in DB."));
     }
 
@@ -82,7 +82,7 @@ public class VisitController : ControllerBase
         if (!success)
             return BadRequest(ApiResponse<string>.Fail(error!));
 
-        return Ok(ApiResponse<string>.Ok(
+        return Ok(ApiResponse<string>.Success(
             $"{count} visit records created successfully."));
     }
 }

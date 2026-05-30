@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PatientService.Services;
-using Shared;
+using Shared.CL;
 using Shared.DTOs;
 
 namespace PatientService.Controllers;
@@ -20,7 +20,7 @@ public class PatientController : ControllerBase
     public async Task<ActionResult<ApiResponse<IEnumerable<PatientDto>>>> GetAll()
     {
         var result = await _service.GetAllAsync();
-        return Ok(ApiResponse<IEnumerable<PatientDto>>.Ok(result));
+        return Ok(ApiResponse<IEnumerable<PatientDto>>.Success(result));
     }
 
     [HttpGet("{id:guid}")]
@@ -29,7 +29,7 @@ public class PatientController : ControllerBase
         var result = await _service.GetByIdAsync(id);
         if (result is null)
             return NotFound(ApiResponse<PatientDto>.Fail("Patient not found."));
-        return Ok(ApiResponse<PatientDto>.Ok(result));
+        return Ok(ApiResponse<PatientDto>.Success(result));
     }
 
     [HttpPost]
@@ -44,7 +44,7 @@ public class PatientController : ControllerBase
 
         return CreatedAtAction(nameof(GetById),
             new { id = data!.PatientId },
-            ApiResponse<PatientDto>.Ok(data, "Patient created."));
+            ApiResponse<PatientDto>.Success(data, "Patient created."));
     }
 
     [HttpPut("{id:guid}")]
@@ -59,7 +59,7 @@ public class PatientController : ControllerBase
                 ? NotFound(ApiResponse<PatientDto>.Fail(error!))
                 : BadRequest(ApiResponse<PatientDto>.Fail(error!));
 
-        return Ok(ApiResponse<PatientDto>.Ok(data!, "Patient updated."));
+        return Ok(ApiResponse<PatientDto>.Success(data!, "Patient updated."));
     }
 
     // ✅ NEW: deactivate patient
@@ -74,7 +74,7 @@ public class PatientController : ControllerBase
                 ? NotFound(ApiResponse<string>.Fail(error!))
                 : BadRequest(ApiResponse<string>.Fail(error!));
 
-        return Ok(ApiResponse<string>.Ok("INACTIVE", "Patient deactivated."));
+        return Ok(ApiResponse<string>.Success("INACTIVE", "Patient deactivated."));
     }
 }
 

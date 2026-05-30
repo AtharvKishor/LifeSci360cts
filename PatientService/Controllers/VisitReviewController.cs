@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PatientService.Services;
-using Shared;
+using Shared.CL;
 
 namespace PatientService.Controllers;
 
@@ -22,7 +22,7 @@ public class VisitReviewController : ControllerBase
         var message = await _service.SubmitReviewAsync(
             req.Date, req.ProtocolSiteId, req.AttendedVisitIds);
 
-        return Ok(ApiResponse<string>.Ok("Saved", message));
+        return Ok(ApiResponse<string>.Success("Saved", message));
     }
 }
 

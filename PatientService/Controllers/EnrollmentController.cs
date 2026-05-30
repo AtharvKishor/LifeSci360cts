@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PatientService.Services;
-using Shared;
+using Shared.CL;
 using Shared.DTOs;
 
 namespace PatientService.Controllers;
@@ -20,7 +20,7 @@ public class EnrollmentController : ControllerBase
     public async Task<ActionResult<ApiResponse<IEnumerable<EnrollmentDto>>>> GetAll()
     {
         var result = await _service.GetAllAsync();
-        return Ok(ApiResponse<IEnumerable<EnrollmentDto>>.Ok(result));
+        return Ok(ApiResponse<IEnumerable<EnrollmentDto>>.Success(result));
     }
 
     [HttpGet("{id:guid}")]
@@ -29,7 +29,7 @@ public class EnrollmentController : ControllerBase
         var result = await _service.GetByIdAsync(id);
         if (result is null)
             return NotFound(ApiResponse<EnrollmentDto>.Fail("Enrollment not found."));
-        return Ok(ApiResponse<EnrollmentDto>.Ok(result));
+        return Ok(ApiResponse<EnrollmentDto>.Success(result));
     }
 
     [HttpPost]
@@ -44,7 +44,7 @@ public class EnrollmentController : ControllerBase
 
         return CreatedAtAction(nameof(GetById),
             new { id = data!.EnrollmentId },
-            ApiResponse<EnrollmentDto>.Ok(data, "Patient enrolled."));
+            ApiResponse<EnrollmentDto>.Success(data, "Patient enrolled."));
     }
 
     [HttpPut("{id:guid}/withdraw")]
@@ -57,14 +57,14 @@ public class EnrollmentController : ControllerBase
                 ? NotFound(ApiResponse<string>.Fail(error!))
                 : BadRequest(ApiResponse<string>.Fail(error!));
 
-        return Ok(ApiResponse<string>.Ok("WITHDRAWN", "Patient withdrawn."));
+        return Ok(ApiResponse<string>.Success("WITHDRAWN", "Patient withdrawn."));
     }
 
     [HttpGet("protocols")]
     public async Task<ActionResult<ApiResponse<IEnumerable<object>>>> GetProtocols()
     {
         var result = await _service.GetProtocolsAsync();
-        return Ok(ApiResponse<IEnumerable<object>>.Ok(result));
+        return Ok(ApiResponse<IEnumerable<object>>.Success(result));
     }
 
     [HttpGet("protocols/{protocolId:guid}/sites")]
@@ -72,7 +72,7 @@ public class EnrollmentController : ControllerBase
         Guid protocolId)
     {
         var result = await _service.GetSitesByProtocolAsync(protocolId);
-        return Ok(ApiResponse<IEnumerable<object>>.Ok(result));
+        return Ok(ApiResponse<IEnumerable<object>>.Success(result));
     }
 
     // ✅ NEW: count of active patients enrolled in a protocol
@@ -81,7 +81,7 @@ public class EnrollmentController : ControllerBase
         Guid protocolId)
     {
         var count = await _service.GetActivePatientCountAsync(protocolId);
-        return Ok(ApiResponse<int>.Ok(count));
+        return Ok(ApiResponse<int>.Success(count));
     }
 }
 
