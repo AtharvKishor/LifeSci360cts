@@ -4,7 +4,7 @@ namespace Shared.CL;
 
 public class ApiResponse<T>
 {
-    public bool Success { get; init; }
+    public bool IsSuccess { get; init; }
     public string Message { get; init; } = string.Empty;
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -14,20 +14,14 @@ public class ApiResponse<T>
     public List<string>? Errors { get; init; }
 
     public static ApiResponse<T> Ok(T data, string message = "Success")
-        => new ApiResponse<T> { Success = true, Message = message, Data = data };
+        => new() { IsSuccess = true, Message = message, Data = data };
 
     public static ApiResponse<T> OkOnly(string message = "Success")
-        => new ApiResponse<T> { Success = true, Message = message };
+        => new() { IsSuccess = true, Message = message };
+
+    public static ApiResponse<T> Success(T data, string message = "Success")
+        => new() { IsSuccess = true, Data = data, Message = message };
 
     public static ApiResponse<T> Fail(string message, List<string>? errors = null)
-        => new ApiResponse<T> { Success = false, Message = message, Errors = errors };
-    public bool IsSuccess { get; set; }
-    public string Message { get; set; } = string.Empty;
-    public T? Data { get; set; }
-
-    public static ApiResponse<T> Success(T data, string message = "Success") =>
-        new() { IsSuccess = true, Data = data, Message = message };
-
-    public static ApiResponse<T> Fail(string message) =>
-        new() { IsSuccess = false, Message = message };
+        => new() { IsSuccess = false, Message = message, Errors = errors };
 }
