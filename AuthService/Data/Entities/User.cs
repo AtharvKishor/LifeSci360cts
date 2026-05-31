@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,33 +28,11 @@ public partial class User
 
     public bool IsActive { get; set; }
 
-    [Precision(0)]
     public DateTime CreatedAt { get; set; }
-
-    [InverseProperty("GeneratedByUser")]
-    public virtual ICollection<ComplianceReport> ComplianceReports { get; set; } = new List<ComplianceReport>();
-
-    [InverseProperty("GeneratedByUser")]
-    public virtual ICollection<KpiReport> KpiReports { get; set; } = new List<KpiReport>();
-
-    [InverseProperty("RecordedByUser")]
-    public virtual ICollection<LabResult> LabResults { get; set; } = new List<LabResult>();
-
-    [InverseProperty("User")]
-    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
-
-    [InverseProperty("InvestigatorUser")]
-    public virtual ICollection<ProtocolSite> ProtocolSites { get; set; } = new List<ProtocolSite>();
-
-    [InverseProperty("CreatedByUser")]
-    public virtual ICollection<Protocol> Protocols { get; set; } = new List<Protocol>();
 
     [ForeignKey("RoleId")]
     [InverseProperty("Users")]
     public virtual Role Role { get; set; } = null!;
-
-    [InverseProperty("CollectedByUser")]
-    public virtual ICollection<Sample> Samples { get; set; } = new List<Sample>();
 
     [InverseProperty("User")]
     public virtual ICollection<UserSession> UserSessions { get; set; } = new List<UserSession>();

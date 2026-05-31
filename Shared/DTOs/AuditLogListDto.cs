@@ -2,7 +2,7 @@ namespace Shared.CL.DTOs;
 
 public class AuditLogListDto
 {
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
     public string? UserEmail { get; set; }
     public string Action { get; set; } = string.Empty;
     public string ServiceName { get; set; } = string.Empty;

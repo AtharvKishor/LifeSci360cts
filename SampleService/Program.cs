@@ -1,23 +1,25 @@
+using Microsoft.EntityFrameworkCore;
+using SampleService.Data;
+using SampleService.Extensions;
+using SampleService.Repositories;
+using Shared.Extensions;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddAngularCors(builder.Configuration);
+builder.Services.AddDbContext<ServicesDbContext>(opt =>
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("ServicesDb")));
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddScoped<ISampleRepository, SampleRepository>();
+builder.Services.AddScoped<ILabResultRepository, LabResultRepository>();
+
+builder.Services.AddSharedControllers();
+builder.Services.AddSwaggerWithJwt();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
+app.UseSwaggerInDevelopment();
+app.UseSharedMiddleware();
 app.MapControllers();
-
 app.Run();
