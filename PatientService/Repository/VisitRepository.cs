@@ -65,7 +65,7 @@ public class VisitRepository : IVisitRepository
         await _ctx.Visits.AddRangeAsync(visits);
         await _ctx.SaveChangesAsync();
     }
-
+     
     public async Task UpdateAsync(Visit visit)
     {
         _ctx.Visits.Update(visit);

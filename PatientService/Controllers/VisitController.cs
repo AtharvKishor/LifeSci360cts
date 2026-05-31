@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using PatientService.Services;
 using Shared.CL;
 using Shared.DTOs;
@@ -36,7 +36,7 @@ public class VisitController : ControllerBase
 
     [HttpPost]
     public async Task<ActionResult<ApiResponse<VisitDto>>> AddVisit(
-        [FromBody] AddVisitRequest req)
+        [FromBody] AddVisitDto req)
     {
         var (success, error, data) = await _service.AddAsync(
             req.EnrollmentId, req.VisitName, req.VisitDate);
@@ -49,7 +49,7 @@ public class VisitController : ControllerBase
 
     [HttpPut("{id:guid}/reschedule")]
     public async Task<ActionResult<ApiResponse<VisitDto>>> Reschedule(
-        Guid id, [FromBody] RescheduleRequest req)
+        Guid id, [FromBody] RescheduleVisitDto req)
     {
         var (success, error, data) = await _service.RescheduleAsync(id, req.NewDate);
 
@@ -71,10 +71,9 @@ public class VisitController : ControllerBase
             "Visit cancelled. Record preserved in DB."));
     }
 
-    // ✅ NEW: bulk schedule visits for all active patients in a protocol
     [HttpPost("bulk-schedule")]
     public async Task<ActionResult<ApiResponse<string>>> BulkSchedule(
-        [FromBody] BulkScheduleRequest req)
+        [FromBody] BulkScheduleDto req)
     {
         var (success, error, count) = await _service.BulkScheduleAsync(
             req.ProtocolId, req.Visits);
@@ -86,12 +85,3 @@ public class VisitController : ControllerBase
             $"{count} visit records created successfully."));
     }
 }
-
-public record AddVisitRequest(Guid EnrollmentId, string VisitName, DateTime VisitDate);
-public record RescheduleRequest(DateTime NewDate);
-
-// ✅ NEW
-public record BulkScheduleRequest(
-    Guid ProtocolId,
-    List<BulkVisitItem> Visits);
-

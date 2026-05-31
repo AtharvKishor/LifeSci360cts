@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using PatientService.Services;
 using Shared.CL;
 using Shared.DTOs;
@@ -34,7 +34,7 @@ public class EnrollmentController : ControllerBase
 
     [HttpPost]
     public async Task<ActionResult<ApiResponse<EnrollmentDto>>> Enroll(
-        [FromBody] EnrollRequest req)
+        [FromBody] EnrollRequestDto req)
     {
         var (success, error, data) = await _service.EnrollAsync(
             req.PatientId, req.ProtocolSiteId);
@@ -75,7 +75,6 @@ public class EnrollmentController : ControllerBase
         return Ok(ApiResponse<IEnumerable<object>>.Success(result));
     }
 
-    // ✅ NEW: count of active patients enrolled in a protocol
     [HttpGet("protocols/{protocolId:guid}/active-count")]
     public async Task<ActionResult<ApiResponse<int>>> GetActivePatientCount(
         Guid protocolId)
@@ -84,5 +83,3 @@ public class EnrollmentController : ControllerBase
         return Ok(ApiResponse<int>.Success(count));
     }
 }
-
-public record EnrollRequest(Guid PatientId, Guid ProtocolSiteId);

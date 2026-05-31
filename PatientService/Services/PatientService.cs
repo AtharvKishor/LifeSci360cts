@@ -68,8 +68,7 @@ public class PatientService : IPatientService
         return (true, null, MapToDto(patient));
     }
 
-    public async Task<(bool Success, string? Error)> DeactivateAsync(
-        Guid id, string reason)
+    public async Task<(bool Success, string? Error)> DeactivateAsync(Guid id)
     {
         var patient = await _repo.GetByIdAsync(id);
         if (patient is null)
@@ -94,8 +93,6 @@ public class PatientService : IPatientService
             foreach (var v in visits)
                 v.VisitStatus = "CANCELLED";
 
-            if (visits.Any())
-                _ctx.Visits.UpdateRange(visits);
 
             activeEnrollment.EnrollmentStatus = "WITHDRAWN";
             _ctx.PatientEnrollments.Update(activeEnrollment);
@@ -110,10 +107,11 @@ public class PatientService : IPatientService
 
     private static PatientDto MapToDto(Patient p)
     {
+        //Get Most Recent Enrollement
         var enrollment = p.PatientEnrollments
             .OrderByDescending(e => e.EnrolledAt)
             .FirstOrDefault();
-
+        //Status 
         string status = p.PatientStatus == "INACTIVE"
             ? "Inactive"
             : enrollment?.EnrollmentStatus switch

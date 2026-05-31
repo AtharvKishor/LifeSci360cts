@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using PatientService.Services;
 using Shared.CL;
+using Shared.DTOs;
 
 namespace PatientService.Controllers;
 
@@ -17,7 +18,7 @@ public class VisitReviewController : ControllerBase
 
     [HttpPost("submit")]
     public async Task<ActionResult<ApiResponse<string>>> Submit(
-        [FromBody] VisitReviewSubmitRequest req)
+        [FromBody] VisitReviewSubmitDto req)
     {
         var message = await _service.SubmitReviewAsync(
             req.Date, req.ProtocolSiteId, req.AttendedVisitIds);
@@ -25,8 +26,3 @@ public class VisitReviewController : ControllerBase
         return Ok(ApiResponse<string>.Success("Saved", message));
     }
 }
-
-public record VisitReviewSubmitRequest(
-    DateTime Date,
-    Guid? ProtocolSiteId,
-    List<Guid> AttendedVisitIds);
