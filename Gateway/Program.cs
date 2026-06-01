@@ -36,6 +36,21 @@ var app = builder.Build();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
+builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular", policy =>
+        policy.WithOrigins("http://localhost:53719", "http://127.0.0.1:53719")
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
+builder.Services.AddOcelot(builder.Configuration);
+
+var app = builder.Build();
+
+app.UseCors("AllowAngular");
 
 await app.UseOcelot();
 
