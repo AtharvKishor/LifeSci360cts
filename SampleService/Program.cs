@@ -1,45 +1,66 @@
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SampleService.Data;
 using SampleService.Repositories;
+using SampleService.Services;
+using Shared.Extensions;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();//registers all controllers
-builder.Services.AddOpenApi();//enables api documentation
+// CORS
+builder.Services.AddAngularCors(builder.Configuration);
 
-// EF Core — connects to LifeSci360_Services database
-builder.Services.AddDbContext<ServicesDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("ServicesDb")));
+// Database
+builder.Services.AddDbContext<ServicesDbContext>(opt =>
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("ServicesDb"),
+        sql => sql.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(12), errorNumbersToAdd: null)));
 
-// JWT Authentication — same secret as AuthService
-string jwtSecret = builder.Configuration["Jwt:Secret"]!;
+// JWT — configured directly to avoid any Shared.Extensions issues
+var jwtSecret = builder.Configuration["Jwt:Secret"]
+    ?? throw new InvalidOperationException("Jwt:Secret is not configured.");
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+    .AddJwtBearer(opt =>
     {
-        options.TokenValidationParameters = new TokenValidationParameters
+        opt.UseSecurityTokenValidators = true; // Use classic JwtSecurityTokenHandler
+        opt.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
-            ValidateIssuer = false,
-            ValidateAudience = false
+            IssuerSigningKey         = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+            ValidateIssuer           = false,
+            ValidateAudience         = false
+        };
+        opt.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+        {
+            OnMessageReceived = ctx =>
+            {
+                // Manually extract token to avoid any extraction bugs
+                var auth = ctx.Request.Headers["Authorization"].ToString();
+                if (!string.IsNullOrEmpty(auth) && auth.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                    ctx.Token = auth.Substring(7).Trim();
+                return Task.CompletedTask;
+            }
         };
     });
-
 builder.Services.AddAuthorization();
 
-// Register repositories
+// Services
 builder.Services.AddScoped<ISampleRepository, SampleRepository>();
 builder.Services.AddScoped<ILabResultRepository, LabResultRepository>();
+builder.Services.AddScoped<ISampleService, SampleService.Services.SampleService>();
+builder.Services.AddScoped<ILabResultService, LabResultService>();
+
+builder.Services.AddControllers();
+builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 
-app.UseHttpsRedirection();
+app.UseCors("Angular");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

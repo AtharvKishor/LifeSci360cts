@@ -6,7 +6,9 @@ public class SampleListDto
     public Guid EnrollmentId { get; set; }
     public Guid CollectedByUserId { get; set; }
     public string CollectedByUserName { get; set; } = string.Empty;
+    public string CollectedByUserRole { get; set; } = string.Empty;
     public string SampleType { get; set; } = string.Empty;
     public DateTime CollectedDate { get; set; }
     public string Status { get; set; } = string.Empty;
+    public string? Notes { get; set; }
 }

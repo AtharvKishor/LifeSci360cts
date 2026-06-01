@@ -1,0 +1,1071 @@
+<div class="shell">
+
+  <!-- ── Sidebar ─────────────────────────────────────────── -->
+  <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+
+    <div class="sidebar-top">
+      <div class="sidebar-brand">
+      
+        <span class="sidebar-title" *ngIf="!sidebarCollapsed">LIFESCI360</span>
+      </div>
+      <button class="collapse-btn" (click)="sidebarCollapsed = !sidebarCollapsed">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path *ngIf="!sidebarCollapsed" d="M11 19l-7-7 7-7M18 19l-7-7 7-7"/>
+          <path *ngIf="sidebarCollapsed"  d="M13 5l7 7-7 7M6 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item" *ngFor="let item of navItems"
+        [class.active]="activeNav === item.key"
+        (click)="onNavChange(item.key)" [title]="item.label">
+        <svg *ngIf="item.icon==='grid'"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <svg *ngIf="item.icon==='users'"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        <svg *ngIf="item.icon==='flask'"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3h6M9 3v8l-4 9h14l-4-9V3"/></svg>
+        <svg *ngIf="item.icon==='beaker'"   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4.5 6H20M4.5 6L4 20h16l-.5-14M4.5 6l2.5-3h10l2.5 3"/></svg>
+        <svg *ngIf="item.icon==='doc'"      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12h6M9 16h6M13 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V8l-7-5z"/></svg>
+        <svg *ngIf="item.icon==='chart'"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18M7 16l4-4 4 4 4-4"/></svg>
+        <svg *ngIf="item.icon==='audit'"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12h6M9 16h6M17 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2z"/><path d="M9 8h6"/></svg>
+        <svg *ngIf="item.icon==='settings'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <span class="nav-label" *ngIf="!sidebarCollapsed">{{ item.label }}</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="sidebar-user" *ngIf="!sidebarCollapsed">
+        <div class="user-avatar">{{ initials }}</div>
+        <div class="user-meta">
+          <span class="user-email">{{ email }}</span>
+          <span class="user-role">{{ role }}</span>
+        </div>
+      </div>
+      <div class="user-avatar solo" *ngIf="sidebarCollapsed">{{ initials }}</div>
+      <button class="logout-btn" (click)="logout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 16l4-4m0 0l-4-4m4 4H7M13 12v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        <span *ngIf="!sidebarCollapsed">Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main ─────────────────────────────────────────────── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h2 class="page-title">
+          {{ activeNav === 'dashboard' ? 'Dashboard' : activeNav === 'users' ? 'User Management' :
+             activeNav === 'audit' ? 'Audit Log' :
+             activeNav === 'trials' ? 'Clinical Trials' : activeNav === 'samples' ? 'Lab & Samples' :
+             activeNav === 'protocols' ? 'Protocols' : activeNav === 'reports' ? 'Reports' : 'Settings' }}
+        </h2>
+        <span class="breadcrumb">LifeSci360 / {{ role }}</span>
+      </div>
+      <div class="topbar-right">
+        <div class="notif-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span class="notif-dot"></span>
+        </div>
+        <div class="profile-wrap" (click)="toggleProfileMenu($event)">
+          <div class="topbar-avatar">{{ initials }}</div>
+          <div class="profile-dropdown" *ngIf="showProfileMenu" (click)="$event.stopPropagation()">
+            <div class="pd-header">
+              <div class="pd-avatar-lg">{{ initials }}</div>
+              <div class="pd-info">
+                <span class="pd-name">{{ name }}</span>
+                <span class="pd-email">{{ email }}</span>
+                <span class="pd-role-badge">{{ role }}</span>
+              </div>
+            </div>
+            <div class="pd-divider"></div>
+            <button class="pd-item pd-logout" (click)="logout()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 16l4-4m0 0l-4-4m4 4H7M13 12v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+              Sign out
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="content" *ngIf="activeNav === 'dashboard'">
+      <div class="welcome-banner">
+        <div>
+          <h3>{{ greeting }}, {{ name }}!</h3>
+          <p>Watch around the activities going on your company.</p>
+        </div>
+        <div class="banner-date">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
+          <span>{{ today }}</span>
+        </div>
+      </div>
+
+      <!-- Admin stats grid -->
+      <div class="stats-grid" *ngIf="isAdmin">
+        <div class="stat-card" *ngFor="let s of stats">
+          <div class="stat-top">
+            <div class="stat-icon-wrap" [style.background]="s.color" [style.color]="s.accent">
+              <svg *ngIf="s.icon==='users'"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+              <svg *ngIf="s.icon==='enrolled'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+              <svg *ngIf="s.icon==='sessions'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+              <svg *ngIf="s.icon==='shield'"   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <span class="stat-delta" [class.up]="s.up" [class.down]="!s.up" *ngIf="s.delta">
+              {{ s.delta }}
+              <svg viewBox="0 0 12 12" fill="currentColor"><path *ngIf="s.up" d="M6 2l4 5H2l4-5z"/><path *ngIf="!s.up" d="M6 10L2 5h8l-4 5z"/></svg>
+            </span>
+          </div>
+          <p class="stat-value">{{ s.value }}</p>
+          <p class="stat-label">{{ s.label }}</p>
+        </div>
+      </div>
+
+      <!-- Non-admin professional dashboard -->
+      <ng-container *ngIf="!isAdmin">
+
+        <!-- Sample stat cards -->
+        <div class="stats-grid" style="margin-bottom:1.5rem;">
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon-wrap" style="background:#e8f5e9;color:#2e7d32;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4.5 6H20M4.5 6L4 20h16l-.5-14M4.5 6l2.5-3h10l2.5 3"/></svg>
+              </div>
+            </div>
+            <p class="stat-value">{{ samplesLoading ? '—' : myTotalSamples }}</p>
+            <p class="stat-label">{{ role === 'LAB_TECHNICIAN' ? 'My Samples' : 'Total Samples' }}</p>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon-wrap" style="background:#fef3c7;color:#92400e;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+            </div>
+            <p class="stat-value">{{ samplesLoading ? '—' : myActiveSamples }}</p>
+            <p class="stat-label">Active / In-Process</p>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon-wrap" style="background:#dcfce7;color:#15803d;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+            </div>
+            <p class="stat-value">{{ samplesLoading ? '—' : myCompletedSamples }}</p>
+            <p class="stat-label">Tested / Analyzed</p>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon-wrap" style="background:#fee2e2;color:#b91c1c;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              </div>
+            </div>
+            <p class="stat-value">{{ samplesLoading ? '—' : myRejectedSamples }}</p>
+            <p class="stat-label">Rejected</p>
+          </div>
+        </div>
+
+        <!-- Quick actions + recent samples side by side -->
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:1.25rem;align-items:start;">
+
+          <!-- Quick actions -->
+          <div class="section-card">
+            <div class="section-header"><h4>Quick Actions</h4></div>
+            <div style="padding:.5rem 1rem 1rem;">
+              <button class="qa-card" style="width:100%;margin-bottom:.75rem;" (click)="onNavChange('samples')">
+                <div class="qa-icon" style="background:#e8f5e9;color:#2e7d32;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4.5 6H20M4.5 6L4 20h16l-.5-14M4.5 6l2.5-3h10l2.5 3"/></svg>
+                </div>
+                <div class="qa-text"><span class="qa-label">My Samples</span><span class="qa-sub">View all your samples</span></div>
+                <svg class="qa-arrow" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+              </button>
+              <button class="qa-card" style="width:100%;" *ngIf="canCreateSample" (click)="onNavChange('samples'); openCreateSamplePanel()">
+                <div class="qa-icon" style="background:#e3f2fd;color:#1565c0;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </div>
+                <div class="qa-text"><span class="qa-label">New Sample</span><span class="qa-sub">Record a new collection</span></div>
+                <svg class="qa-arrow" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Recent samples -->
+          <div class="section-card">
+            <div class="section-header">
+              <h4>Recent Samples</h4>
+              <button class="see-all-btn" (click)="onNavChange('samples')">See all</button>
+            </div>
+            <div class="re-loading" *ngIf="samplesLoading"><div class="spinner-lg"></div><span>Loading...</span></div>
+            <ul class="re-list" *ngIf="!samplesLoading">
+              <li class="re-item" *ngFor="let s of myRecentSamples">
+                <div class="re-avatar" style="border-radius:8px;background:#e8f5e9;color:#2e7d32;">
+                  <svg viewBox="0 0 20 20" fill="currentColor" style="width:16px;height:16px;"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/></svg>
+                </div>
+                <div class="re-info">
+                  <span class="re-name">{{ s.sampleType }}</span>
+                  <span class="re-email">{{ s.collectedDate | date:'dd MMM yyyy, HH:mm' }}</span>
+                </div>
+                <span class="sample-status-badge" [style.background]="statusColor(s.status)" [style.color]="statusTextColor(s.status)">{{ s.status }}</span>
+              </li>
+              <li class="re-empty" *ngIf="myRecentSamples.length === 0">No samples collected yet.</li>
+            </ul>
+          </div>
+
+        </div>
+      </ng-container>
+
+      <!-- Quick Actions (admin only) -->
+      <div class="quick-actions" *ngIf="isAdmin">
+        <h4 class="qa-title">Quick Actions</h4>
+        <div class="qa-grid">
+
+          <button class="qa-card" (click)="enrollEmployee()">
+            <div class="qa-icon" style="background:#e8f5e9; color:#2e7d32;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <line x1="19" y1="8" x2="19" y2="14"/>
+                <line x1="22" y1="11" x2="16" y2="11"/>
+              </svg>
+            </div>
+            <div class="qa-text">
+              <span class="qa-label">Enroll Employee</span>
+              <span class="qa-sub">Add a new team member</span>
+            </div>
+            <svg class="qa-arrow" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+
+          <button class="qa-card" (click)="onNavChange('users')">
+            <div class="qa-icon" style="background:#e3f2fd; color:#1565c0;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+              </svg>
+            </div>
+            <div class="qa-text">
+              <span class="qa-label">Manage Users</span>
+              <span class="qa-sub">View all enrolled users</span>
+            </div>
+            <svg class="qa-arrow" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+
+          <button class="qa-card" (click)="onNavChange('reports')">
+            <div class="qa-icon" style="background:#f3e5f5; color:#6a1b9a;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M3 3v18h18M7 16l4-4 4 4 4-4"/>
+              </svg>
+            </div>
+            <div class="qa-text">
+              <span class="qa-label">View Reports</span>
+              <span class="qa-sub">Compliance & analytics</span>
+            </div>
+            <svg class="qa-arrow" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+
+          <button class="qa-card" (click)="onNavChange('trials')">
+            <div class="qa-icon" style="background:#fff3e0; color:#e65100;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M9 3h6M9 3v8l-4 9h14l-4-9V3"/>
+              </svg>
+            </div>
+            <div class="qa-text">
+              <span class="qa-label">Clinical Trials</span>
+              <span class="qa-sub">Review active trials</span>
+            </div>
+            <svg class="qa-arrow" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+
+        </div>
+      </div>
+
+      <div class="section-card" *ngIf="isAdmin">
+        <div class="section-header">
+          <h4>Recently Enrolled</h4>
+          <button class="see-all-btn" (click)="onNavChange('users')">See all</button>
+        </div>
+
+        <div class="re-loading" *ngIf="sessionsLoading">
+          <div class="spinner-lg"></div><span>Loading...</span>
+        </div>
+
+        <ul class="re-list" *ngIf="!sessionsLoading">
+          <li class="re-item" *ngFor="let u of recentEmployees">
+            <div class="re-avatar">{{ avatarFor(u.name) }}</div>
+            <div class="re-info">
+              <span class="re-name">{{ u.name }}</span>
+              <span class="re-email">{{ u.email }}</span>
+            </div>
+            <div class="re-right">
+              <span class="role-chip">{{ u.role }}</span>
+              <span class="re-date">{{ u.createdAt | date:'dd MMM yyyy' }}</span>
+            </div>
+          </li>
+          <li class="re-empty" *ngIf="recentEmployees.length === 0">No employees enrolled yet.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ══ USERS ══ -->
+    <div class="content" *ngIf="activeNav === 'users'">
+
+      <!-- Not admin fallback -->
+      <div class="access-denied" *ngIf="!isAdmin">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <h3>Access Restricted</h3>
+        <p>Only administrators can manage user enrollments.</p>
+      </div>
+
+      <ng-container *ngIf="isAdmin">
+        <!-- Header row -->
+        <div class="users-header">
+          <div>
+            <h3 class="section-title">Enrolled Users</h3>
+            <p class="section-sub">Manage platform access for all non-patient roles.</p>
+          </div>
+          <button class="btn-enroll" (click)="openEnrollPanel()">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+            Enroll New User
+          </button>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading-row" *ngIf="usersLoading">
+          <div class="spinner-lg"></div>
+          <span>Loading users...</span>
+        </div>
+
+        <!-- Users table -->
+        <div class="section-card" *ngIf="!usersLoading">
+          <div class="section-header">
+            <h4>All Users</h4>
+            <span class="section-badge  ">{{ users.length }} enrolled</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>User</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Enrolled</th><th></th></tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let u of users">
+                  <td>
+                    <div class="td-user">
+                      <div class="td-avatar">{{ avatarFor(u.name) }}</div>
+                      <span class="user-name">{{ u.name }}</span>
+                    </div>
+                  </td>
+                  <td class="muted">{{ u.email }}</td>
+                  <td class="muted">{{ u.phone || '—' }}</td>
+                  <td><span class="role-chip">{{ u.role }}</span></td>
+                  <td>
+                    <span class="status-badge" [class.active]="u.isActive" [class.offline]="!u.isActive">
+                      <span class="status-dot"></span>{{ u.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                  <td class="muted">{{ u.createdAt | date:'dd MMM yyyy' }}</td>
+                  <td>
+                    <button class="btn-edit-row" *ngIf="canEdit(u)" (click)="openEditPanel(u)" title="Edit user">
+                      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="users.length === 0">
+                  <td colspan="6" class="empty-row">No users enrolled yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- ══ AUDIT LOG ══ -->
+    <div class="content" *ngIf="activeNav === 'audit'">
+
+      <!-- Non-admin fallback -->
+      <div class="access-denied" *ngIf="!isAdmin">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <h3>Access Restricted</h3>
+        <p>Only administrators can view the audit log.</p>
+      </div>
+
+      <ng-container *ngIf="isAdmin">
+      <div class="audit-toolbar">
+        <div>
+          <h3 class="section-title">Activity Audit Log</h3>
+          <p class="section-sub">All platform events — logins, enrollments, and failures — in real time.</p>
+        </div>
+        <div class="audit-filter-wrap">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>
+          <input type="text" [(ngModel)]="auditFilter" placeholder="Filter by name, email, or action..."/>
+        </div>
+      </div>
+
+      <div class="loading-row" *ngIf="auditLoading">
+        <div class="spinner-lg"></div>
+        <span>Loading audit log...</span>
+      </div>
+
+      <div class="section-card" *ngIf="!auditLoading">
+        <div class="section-header">
+          <h4>Events</h4>
+          <span class="section-badge">{{ filteredAuditLogs.length }} records</span>
+        </div>
+        <div class="table-wrap table-wrap--scroll">
+          <table>
+            <thead class="thead-sticky">
+              <tr>
+                <th>Timestamp</th>
+                <th>Actor</th>
+                <th>Action</th>
+                <th>Description</th>
+                <th>Target</th>
+                <th>IP Address</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let log of filteredAuditLogs">
+                <td class="muted audit-time">{{ log.createdAt | date:'dd MMM yyyy, HH:mm:ss' }}</td>
+                <td>
+                  <div class="td-user">
+                    <div class="td-avatar">{{ avatarFor(log.actorName) }}</div>
+                    <div class="actor-meta">
+                      <span class="user-name">{{ log.actorName }}</span>
+                      <span class="actor-email">{{ log.actorEmail }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="action-badge" [style.background]="actionColor(log.action)" [style.color]="actionTextColor(log.action)">
+                    {{ log.action }}
+                  </span>
+                </td>
+                <td class="audit-desc">{{ log.description }}</td>
+                <td class="muted">{{ log.targetUserName || '—' }}</td>
+                <td class="muted mono">{{ log.ipAddress || '—' }}</td>
+                <td>
+                  <span class="status-badge" [class.active]="log.isSuccess" [class.offline]="!log.isSuccess">
+                    <span class="status-dot"></span>{{ log.isSuccess ? 'Success' : 'Failed' }}
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="filteredAuditLogs.length === 0 && !auditLoading">
+                <td colspan="7" class="empty-row">No audit events found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      </ng-container>
+    </div>
+
+    <!-- ══ SAMPLES ══ -->
+    <div class="content" *ngIf="activeNav === 'samples'">
+
+      <!-- ─ Samples list view ─ -->
+      <ng-container *ngIf="!showLabResultsView">
+
+        <div class="users-header">
+          <div>
+            <h3 class="section-title">Lab &amp; Samples</h3>
+            <p class="section-sub">Manage biological sample collection and tracking.</p>
+          </div>
+          <button class="btn-enroll" *ngIf="canCreateSample" (click)="openCreateSamplePanel()">  <!--calls this function in ts-->
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+            New Sample
+          </button>
+        </div>
+
+        <div class="loading-row" *ngIf="samplesLoading">
+          <div class="spinner-lg"></div>
+          <span>Loading samples...</span>
+        </div>
+
+        <div class="section-card" *ngIf="!samplesLoading">
+          <div class="section-header">
+            <h4>All Samples</h4>
+            <span class="section-badge">{{ samples.length }} record(s)</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Sample Type</th>
+                  <th *ngIf="role !== 'LAB_TECHNICIAN'">Collected By</th>
+                  <th>Collected Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let s of samples">
+                  <td>
+                    <div class="td-user">
+                      <div class="sample-type-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4.5 6H20M4.5 6L4 20h16l-.5-14M4.5 6l2.5-3h10l2.5 3"/></svg>
+                      </div>
+                      <span class="user-name">{{ s.sampleType }}</span>
+                    </div>
+                  </td>
+                  <td *ngIf="role !== 'LAB_TECHNICIAN'">
+                    <div class="td-user">
+                      <div class="td-avatar">{{ avatarFor(s.collectedByUserName) }}</div>
+                      <div>
+                        <span class="user-name">{{ s.collectedByUserName }}</span>
+                        <span class="collector-role" *ngIf="s.collectedByUserRole">[{{ s.collectedByUserRole }}]</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="muted">{{ s.collectedDate | date:'dd MMM yyyy, HH:mm' }}</td>
+                  <td>
+                    <span class="sample-status-badge"
+                      [style.background]="statusColor(s.status)"
+                      [style.color]="statusTextColor(s.status)">
+                      {{ s.status }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="action-btns">
+                      <button class="btn-action btn-view" (click)="viewLabResults(s)" title="View Lab Results">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10z" clip-rule="evenodd"/></svg>
+                        Results
+                      </button>
+                      <button class="btn-action btn-edit-sm" *ngIf="canEditSample" (click)="openEditSamplePanel(s)" title="Edit Sample">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg>
+                        Edit
+                      </button>
+                      <button class="btn-action btn-status" *ngIf="canUpdateStatus" (click)="openUpdateStatusPanel(s)" title="Update Status">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                        Status
+                      </button>
+                      <button class="btn-action btn-delete" *ngIf="isAdmin" (click)="deleteSampleById(s.sampleId, s.sampleType)" title="Delete Sample">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                        Delete
+                      </button>
+                    </div>
+
+                  </td>
+                </tr>
+                <tr *ngIf="samples.length === 0 && !samplesError">
+                  <td [attr.colspan]="role === 'LAB_TECHNICIAN' ? 4 : 5" class="empty-row">No samples found.</td>
+                </tr>
+                <tr *ngIf="samplesError">
+                  <td [attr.colspan]="role === 'LAB_TECHNICIAN' ? 4 : 5" class="empty-row" style="color:#c0392b; font-weight:600;">
+                    ⚠️ {{ samplesError }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ─ Lab Results sub-view ─ -->
+      <ng-container *ngIf="showLabResultsView && selectedSample">
+
+        <!-- Back + sample info -->
+        <div class="lab-header">
+          <button class="btn-back" (click)="backToSamples()">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            Back to Samples
+          </button>
+          <div class="lab-header-right">
+            <button class="btn-enroll" *ngIf="canManageLabResults" (click)="openCreateLabResultPanel()">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+              Add Lab Result
+            </button>
+          </div>
+        </div>
+
+        <!-- Selected sample summary card -->
+        <div class="sample-summary-card">
+          <div class="sample-summary-left">
+            <div class="sample-icon-lg">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4.5 6H20M4.5 6L4 20h16l-.5-14M4.5 6l2.5-3h10l2.5 3"/></svg>
+            </div>
+            <div>
+              <h4>{{ selectedSample.sampleType }}</h4>
+              <p class="muted">Collected by {{ selectedSample.collectedByUserName }} <span *ngIf="selectedSample.collectedByUserRole">[{{ selectedSample.collectedByUserRole }}]</span> &bull; {{ selectedSample.collectedDate | date:'dd MMM yyyy' }}</p>
+            </div>
+          </div>
+          <span class="sample-status-badge"
+            [style.background]="statusColor(selectedSample.status)"
+            [style.color]="statusTextColor(selectedSample.status)">
+            {{ selectedSample.status }}
+          </span>
+        </div>
+
+        <!-- Lab results loading -->
+        <div class="loading-row" *ngIf="labResultsLoading">
+          <div class="spinner-lg"></div>
+          <span>Loading lab results...</span>
+        </div>
+
+        <!-- Lab results error -->
+        <div class="lr-error-row" *ngIf="!labResultsLoading && labResultsError">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+          <span>{{ labResultsError }}</span>
+          <button class="btn-retry" (click)="selectedSample && loadLabResults(selectedSample.sampleId)">Retry</button>
+        </div>
+
+        <!-- Lab results table -->
+        <div class="section-card" *ngIf="!labResultsLoading && !labResultsError">
+          <div class="section-header">
+            <h4>Lab Results</h4>
+            <span class="section-badge">{{ labResults.length }} result(s)</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Test Type</th>
+                  <th>Result Value</th>
+                  <th>Result Date</th>
+                  <th>Recorded By</th>
+                  <th *ngIf="canManageLabResults || isAdmin">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let r of labResults">
+                  <td><span class="user-name">{{ r.testType }}</span></td>
+                  <td>
+                    <span class="result-value-badge"
+                      [class.result-normal]="r.resultValue.toLowerCase().includes('normal')"
+                      [class.result-abnormal]="r.resultValue.toLowerCase().includes('abnormal')">
+                      {{ r.resultValue }}
+                    </span>
+                  </td>
+                  <td class="muted">{{ r.resultDate | date:'dd MMM yyyy' }}</td>
+                  <td>
+                    <div class="td-user">
+                      <div class="td-avatar">{{ avatarFor(r.recordedByUserName) }}</div>
+                      <span class="muted">{{ r.recordedByUserName }}</span>
+                    </div>
+                  </td>
+                  <td *ngIf="canManageLabResults || isAdmin">
+                    <div class="action-btns">
+                      <button class="btn-action btn-edit-sm" *ngIf="canManageLabResults" (click)="openEditLabResultPanel(r)" title="Edit Result">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg>
+                        Edit
+                      </button>
+                      <button class="btn-action btn-delete" *ngIf="isAdmin" (click)="deleteLabResultById(r.resultId, r.testType)" title="Delete Result">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="labResults.length === 0">
+                  <td colspan="5" class="empty-row">No lab results found for this sample.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ── My Note (RESEARCH_SCIENTIST only, when results exist) ── -->
+        <div class="note-card" *ngIf="role === 'RESEARCH_SCIENTIST' && (selectedSample.status === 'TESTED' || selectedSample.status === 'ANALYZED') && labResults.length > 0">
+          <div class="note-card-header">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"/><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"/></svg>
+            <span>My Note</span>
+            <span class="note-saved-chip" *ngIf="selectedSample?.notes">Saved</span>
+          </div>
+
+          <ng-container *ngIf="selectedSample">
+            <!-- Viewing saved note -->
+            <div *ngIf="selectedSample.notes && noteEditId !== selectedSample.sampleId" class="note-view">
+              <p class="note-text">{{ selectedSample.notes }}</p>
+              <div class="note-view-actions">
+                <button class="btn-action btn-edit-sm" (click)="openNoteEdit(selectedSample.sampleId)">
+                  <svg viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg>
+                  Edit
+                </button>
+                <button class="btn-action btn-delete" (click)="clearNote(selectedSample.sampleId)">
+                  <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                  Remove
+                </button>
+              </div>
+            </div>
+
+            <!-- Edit / add note -->
+            <div *ngIf="!selectedSample.notes || noteEditId === selectedSample.sampleId" class="note-edit">
+              <textarea [(ngModel)]="noteDraft"
+                        placeholder="Write your observations, findings, or flag this sample for further action..."
+                        rows="3"></textarea>
+              <div class="note-edit-actions">
+                <button class="btn-save-note" (click)="saveNote(selectedSample.sampleId)" [disabled]="!noteDraft.trim()">Save Note</button>
+                <button class="btn-action" *ngIf="noteEditId === selectedSample.sampleId" (click)="noteEditId=''">Cancel</button>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+
+      </ng-container>
+    </div>
+
+    <!-- ══ OTHER SECTIONS (trials, protocols, reports, settings) ══ -->
+    <div class="content placeholder-content" *ngIf="activeNav !== 'dashboard' && activeNav !== 'users' && activeNav !== 'audit' && activeNav !== 'samples'">
+
+      <!-- Non-admin: access restricted -->
+      <div class="access-denied" *ngIf="!isAdmin">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+        </svg>
+        <h3>Access Restricted</h3>
+        <p>You don't have permission to view this section.<br/>Please contact your administrator.</p>
+      </div>
+
+      <!-- Admin: coming soon -->
+      <div class="placeholder-card" *ngIf="isAdmin">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        <h3>{{ activeNav | titlecase }} Module</h3>
+        <p>This section is under development.</p>
+      </div>
+
+    </div>
+
+  </div><!-- /main -->
+
+  <!-- ══ EDIT USER SLIDE PANEL ══ -->
+  <div class="overlay" *ngIf="showEditPanel" (click)="closeEditPanel()"></div>
+  <div class="enroll-panel" [class.open]="showEditPanel">
+
+    <div class="panel-head">
+      <div>
+        <h3>Edit User</h3>
+        <p>{{ editingUser?.email }}</p>
+      </div>
+      <button class="close-btn" (click)="closeEditPanel()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+      </button>
+    </div>
+
+    <form [formGroup]="editForm" (ngSubmit)="submitEdit()" class="panel-form">
+
+      <div class="panel-alert success" *ngIf="editSuccess">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        {{ editSuccess }}
+      </div>
+      <div class="panel-alert error" *ngIf="editError">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+        {{ editError }}
+      </div>
+
+      <div class="field">
+        <label>Full Name <span class="req">*</span></label>
+        <input type="text" formControlName="name" placeholder="e.g. Jane Doe"/>
+        <span class="ferr" *ngIf="editForm.get('name')?.touched && editForm.get('name')?.invalid">Full name is required (min 2 chars).</span>
+      </div>
+
+      <div class="field">
+        <label>Phone <span class="opt">(optional)</span></label>
+        <input type="tel" formControlName="phone" placeholder="+1 555 000 0000"/>
+      </div>
+
+      <div class="field">
+        <label>Role <span class="req">*</span></label>
+        <select formControlName="roleName">
+          <option value="" disabled>Select a role...</option>
+          <option *ngFor="let r of roles" [value]="r.roleName">{{ r.roleName }}</option>
+        </select>
+        <span class="ferr" *ngIf="editForm.get('roleName')?.touched && editForm.get('roleName')?.invalid">Please select a role.</span>
+      </div>
+
+      <div class="field">
+        <label>Status</label>
+        <div class="toggle-row">
+          <label class="toggle-switch">
+            <input type="checkbox" formControlName="isActive"/>
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+          <span class="toggle-label">{{ editForm.get('isActive')?.value ? 'Active' : 'Inactive' }}</span>
+        </div>
+      </div>
+
+      <div class="panel-actions">
+        <button type="button" class="btn-cancel" (click)="closeEditPanel()">Cancel</button>
+        <button type="submit" class="btn-submit" [disabled]="editForm.invalid || editLoading">
+          <span class="spinner-sm" *ngIf="editLoading"></span>
+          <span>{{ editLoading ? 'Saving...' : 'Save Changes' }}</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- ══ CREATE SAMPLE PANEL ══ -->
+  <div class="overlay" *ngIf="showCreateSamplePanel" (click)="closeCreateSamplePanel()"></div>
+  <div class="enroll-panel" [class.open]="showCreateSamplePanel">
+    <div class="panel-head">
+      <div><h3>New Sample</h3><p>Record a newly collected biological sample.</p></div>
+      <button class="close-btn" (click)="closeCreateSamplePanel()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+      </button>
+    </div>
+    <form [formGroup]="createSampleForm" (ngSubmit)="submitCreateSample()" class="panel-form"> <!--Connects the HTML form to the TypeScript form object-->
+      <div class="panel-alert success" *ngIf="createSampleSuccess">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+        {{ createSampleSuccess }}
+      </div>
+      <div class="panel-alert error" *ngIf="createSampleError">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+        {{ createSampleError }}
+      </div>
+      <div class="field">
+        <label>Sample Type <span class="req">*</span></label>
+        <input type="text" formControlName="sampleType" placeholder="e.g. Blood, Plasma, Urine, Tissue..." />
+        <span class="ferr" *ngIf="createSampleForm.get('sampleType')?.touched && createSampleForm.get('sampleType')?.invalid">Sample type is required.</span>
+      </div>
+      <div class="field">
+        <label>Enrollment ID <span class="req">*</span></label>
+        <input type="text" formControlName="enrollmentId" placeholder="e.g. E0000000-0000-0000-0000-000000000001" />
+        <span class="ferr" *ngIf="createSampleForm.get('enrollmentId')?.touched && createSampleForm.get('enrollmentId')?.invalid">Enrollment ID is required.</span>
+      </div>
+      <div class="field">
+        <label>Collection Date &amp; Time <span class="req">*</span></label>
+        <input type="datetime-local" formControlName="collectedDate" />
+        <span class="ferr" *ngIf="createSampleForm.get('collectedDate')?.touched && createSampleForm.get('collectedDate')?.invalid">Collection date is required.</span>
+      </div>
+      <div class="panel-actions">
+        <button type="button" class="btn-cancel" (click)="closeCreateSamplePanel()">Cancel</button>
+        <button type="submit" class="btn-submit" [disabled]="createSampleForm.invalid || createSampleLoading">
+          <span class="spinner-sm" *ngIf="createSampleLoading"></span>
+          <span>{{ createSampleLoading ? 'Saving...' : 'Create Sample' }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ══ EDIT SAMPLE PANEL ══ -->
+  <div class="overlay" *ngIf="showEditSamplePanel" (click)="closeEditSamplePanel()"></div>
+  <div class="enroll-panel" [class.open]="showEditSamplePanel">
+    <div class="panel-head">
+      <div><h3>Edit Sample</h3></div>
+      <button class="close-btn" (click)="closeEditSamplePanel()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+      </button>
+    </div>
+    <form [formGroup]="editSampleForm" (ngSubmit)="submitEditSample()" class="panel-form">
+      <div class="panel-alert success" *ngIf="editSampleSuccess">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        {{ editSampleSuccess }}
+      </div>
+      <div class="panel-alert error" *ngIf="editSampleError">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+        {{ editSampleError }}
+      </div>
+      <div class="field">
+        <label>Sample Type</label>
+        <input type="text" formControlName="sampleType" placeholder="e.g. Blood, Plasma, Urine..."/>
+      </div>
+      <div class="panel-actions">
+        <button type="button" class="btn-cancel" (click)="closeEditSamplePanel()">Cancel</button>
+        <button type="submit" class="btn-submit" [disabled]="editSampleLoading">
+          <span class="spinner-sm" *ngIf="editSampleLoading"></span>
+          <span>{{ editSampleLoading ? 'Saving...' : 'Save Changes' }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ══ UPDATE STATUS PANEL ══ -->
+  <div class="overlay" *ngIf="showUpdateStatusPanel" (click)="closeUpdateStatusPanel()"></div>
+  <div class="enroll-panel enroll-panel--sm" [class.open]="showUpdateStatusPanel">
+    <div class="panel-head">
+      <div><h3>Update Status</h3><p>{{ updatingStatusSample?.sampleType }}</p></div>
+      <button class="close-btn" (click)="closeUpdateStatusPanel()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+      </button>
+    </div>
+    <form [formGroup]="updateStatusForm" (ngSubmit)="submitUpdateStatus()" class="panel-form">
+      <div class="panel-alert success" *ngIf="updateStatusSuccess">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        {{ updateStatusSuccess }}
+      </div>
+      <div class="panel-alert error" *ngIf="updateStatusError">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+        {{ updateStatusError }}
+      </div>
+      <div class="field">
+        <label>New Status <span class="req">*</span></label>
+        <select formControlName="status">
+          <option *ngFor="let st of sampleStatuses" [value]="st">{{ st }}</option>
+        </select>
+      </div>
+      <div class="panel-actions">
+        <button type="button" class="btn-cancel" (click)="closeUpdateStatusPanel()">Cancel</button>
+        <button type="submit" class="btn-submit" [disabled]="updateStatusForm.invalid || updateStatusLoading">
+          <span class="spinner-sm" *ngIf="updateStatusLoading"></span>
+          <span>{{ updateStatusLoading ? 'Updating...' : 'Update Status' }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ══ CREATE LAB RESULT PANEL ══ -->
+  <div class="overlay" *ngIf="showCreateLabResultPanel" (click)="closeCreateLabResultPanel()"></div>
+  <div class="enroll-panel" [class.open]="showCreateLabResultPanel">
+    <div class="panel-head">
+      <div><h3>Add Lab Result</h3><p>{{ selectedSample?.sampleType }}</p></div>
+      <button class="close-btn" (click)="closeCreateLabResultPanel()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+      </button>
+    </div>
+    <form [formGroup]="createLabResultForm" (ngSubmit)="submitCreateLabResult()" class="panel-form">
+      <div class="panel-alert success" *ngIf="createLabResultSuccess">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        {{ createLabResultSuccess }}
+      </div>
+      <div class="panel-alert error" *ngIf="createLabResultError">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+        {{ createLabResultError }}
+      </div>
+      <div class="field">
+        <label>Test Type <span class="req">*</span></label>
+        <input type="text" formControlName="testType" placeholder="e.g. CBC, HbA1c, PCR, ELISA..."/>
+        <span class="ferr" *ngIf="createLabResultForm.get('testType')?.touched && createLabResultForm.get('testType')?.invalid">Test type is required.</span>
+      </div>
+      <div class="field">
+        <label>Result Value <span class="req">*</span></label>
+        <input type="text" formControlName="resultValue" placeholder="e.g. Normal, Abnormal - High WBC"/>
+        <span class="ferr" *ngIf="createLabResultForm.get('resultValue')?.touched && createLabResultForm.get('resultValue')?.invalid">Result value is required.</span>
+      </div>
+      <div class="field">
+        <label>Result Date <span class="req">*</span></label>
+        <input type="date" formControlName="resultDate"/>
+        <span class="ferr" *ngIf="createLabResultForm.get('resultDate')?.touched && createLabResultForm.get('resultDate')?.invalid">Result date is required.</span>
+      </div>
+      <div class="panel-actions">
+        <button type="button" class="btn-cancel" (click)="closeCreateLabResultPanel()">Cancel</button>
+        <button type="submit" class="btn-submit" [disabled]="createLabResultForm.invalid || createLabResultLoading">
+          <span class="spinner-sm" *ngIf="createLabResultLoading"></span>
+          <span>{{ createLabResultLoading ? 'Recording...' : 'Record Result' }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ══ EDIT LAB RESULT PANEL ══ -->
+  <div class="overlay" *ngIf="showEditLabResultPanel" (click)="closeEditLabResultPanel()"></div>
+  <div class="enroll-panel" [class.open]="showEditLabResultPanel">
+    <div class="panel-head">
+      <div><h3>Edit Lab Result</h3><p>{{ editingLabResult?.testType }}</p></div>
+      <button class="close-btn" (click)="closeEditLabResultPanel()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+      </button>
+    </div>
+    <form [formGroup]="editLabResultForm" (ngSubmit)="submitEditLabResult()" class="panel-form">
+      <div class="panel-alert success" *ngIf="editLabResultSuccess">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        {{ editLabResultSuccess }}
+      </div>
+      <div class="panel-alert error" *ngIf="editLabResultError">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+        {{ editLabResultError }}
+      </div>
+      <div class="field">
+        <label>Test Type</label>
+        <input type="text" formControlName="testType" placeholder="e.g. CBC, HbA1c, PCR, ELISA..."/>
+      </div>
+      <div class="field">
+        <label>Result Value</label>
+        <input type="text" formControlName="resultValue" placeholder="e.g. Normal, Abnormal - High WBC"/>
+      </div>
+      <div class="field">
+        <label>Result Date</label>
+        <input type="date" formControlName="resultDate"/>
+      </div>
+      <div class="panel-actions">
+        <button type="button" class="btn-cancel" (click)="closeEditLabResultPanel()">Cancel</button>
+        <button type="submit" class="btn-submit" [disabled]="editLabResultLoading">
+          <span class="spinner-sm" *ngIf="editLabResultLoading"></span>
+          <span>{{ editLabResultLoading ? 'Saving...' : 'Save Changes' }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ══ ENROLL SLIDE PANEL ══ -->
+  <div class="overlay" *ngIf="showEnrollPanel" (click)="closeEnrollPanel()"></div>
+  <div class="enroll-panel" [class.open]="showEnrollPanel">
+
+    <div class="panel-head">
+      <div>
+        <h3>Enroll New User</h3>
+        <p>Create access credentials for a team member.</p>
+      </div>
+      <button class="close-btn" (click)="closeEnrollPanel()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+      </button>
+    </div>
+
+    <form [formGroup]="enrollForm" (ngSubmit)="submitEnroll()" class="panel-form">
+
+      <div class="panel-alert success" *ngIf="enrollSuccess">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        {{ enrollSuccess }}
+      </div>
+      <div class="panel-alert error" *ngIf="enrollError">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+        {{ enrollError }}
+      </div>
+
+      <div class="field">
+        <label>Full Name <span class="req">*</span></label>
+        <input type="text" formControlName="name" placeholder="e.g. Jane Doe"/>
+        <span class="ferr" *ngIf="enrollForm.get('name')?.touched && enrollForm.get('name')?.invalid">Full name is required (min 2 chars).</span>
+      </div>
+
+      <div class="field">
+        <label>Email Address <span class="req">*</span></label>
+        <input type="email" formControlName="email" placeholder="jane@lifesci360.com"/>
+        <span class="ferr" *ngIf="enrollForm.get('email')?.touched && enrollForm.get('email')?.invalid">Valid email is required.</span>
+      </div>
+
+      <div class="field">
+        <label>Phone <span class="opt">(optional)</span></label>
+        <input type="tel" formControlName="phone" placeholder="+1 555 000 0000"/>
+      </div>
+
+      <div class="field">
+        <label>Role <span class="req">*</span></label>
+        <select formControlName="roleName">
+          <option value="" disabled selected>Select a role...</option>
+          <option *ngFor="let r of roles" [value]="r.roleName">{{ r.roleName }}</option>
+        </select>
+        <span class="ferr" *ngIf="enrollForm.get('roleName')?.touched && enrollForm.get('roleName')?.invalid">Please select a role.</span>
+      </div>
+
+      <div class="field">
+        <label>Temporary Password <span class="req">*</span></label>
+        <div class="pw-wrap">
+          <input [type]="showEnrollPassword ? 'text' : 'password'" formControlName="password" placeholder="Min. 8 characters"/>
+          <button type="button" class="eye-btn" (click)="showEnrollPassword = !showEnrollPassword">
+            <svg *ngIf="!showEnrollPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            <svg *ngIf="showEnrollPassword"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+          </button>
+        </div>
+        <span class="ferr" *ngIf="enrollForm.get('password')?.touched && enrollForm.get('password')?.invalid">Min. 8 characters required.</span>
+      </div>
+
+      <div class="panel-actions">
+        <button type="button" class="btn-cancel" (click)="closeEnrollPanel()">Cancel</button>
+        <button type="submit" class="btn-submit" [disabled]="enrollForm.invalid || enrollLoading">
+          <span class="spinner-sm" *ngIf="enrollLoading"></span>
+          <span>{{ enrollLoading ? 'Enrolling...' : 'Enroll User' }}</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+</div>

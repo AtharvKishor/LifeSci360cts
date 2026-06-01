@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SampleService.Repositories;
+using SampleService.Services;
 using Shared.CL;
 using Shared.CL.DTOs;
 
@@ -11,15 +11,15 @@ namespace SampleService.Controllers;
 [ApiController]
 public class LabResultsController : ControllerBase
 {
-    private readonly ILabResultRepository _repo;
+    private readonly ILabResultService _service;
 
-    public LabResultsController(ILabResultRepository repo) => _repo = repo;
+    public LabResultsController(ILabResultService service) => _service = service;
 
     // GET /api/labresults/sample/{sampleId} — all authenticated users
     [HttpGet("sample/{sampleId:guid}")]
     public async Task<ActionResult<ApiResponse<IList<LabResultListDto>>>> GetBySample(Guid sampleId)
     {
-        IList<LabResultListDto> results = await _repo.GetBySampleAsync(sampleId);
+        IList<LabResultListDto> results = await _service.GetBySampleAsync(sampleId);
         return Ok(ApiResponse<IList<LabResultListDto>>.Success(results, $"{results.Count} result(s) found."));
     }
 
@@ -27,7 +27,7 @@ public class LabResultsController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ApiResponse<LabResultListDto>>> GetById(Guid id)
     {
-        LabResultListDto? result = await _repo.GetByIdAsync(id);
+        LabResultListDto? result = await _service.GetByIdAsync(id);
         if (result == null)
             return NotFound(ApiResponse<LabResultListDto>.Fail("Lab result not found."));
         return Ok(ApiResponse<LabResultListDto>.Success(result));
@@ -38,7 +38,7 @@ public class LabResultsController : ControllerBase
     [Authorize(Roles = "LAB_TECHNICIAN,ADMIN")]
     public async Task<ActionResult<ApiResponse<LabResultListDto>>> Create([FromBody] LabResultCreateDto dto)
     {
-        LabResultListDto created = await _repo.CreateAsync(dto);
+        LabResultListDto created = await _service.CreateAsync(dto);
         return CreatedAtAction(nameof(GetById), new { id = created.ResultId },
             ApiResponse<LabResultListDto>.Success(created, "Lab result recorded successfully."));
     }
@@ -48,7 +48,7 @@ public class LabResultsController : ControllerBase
     [Authorize(Roles = "LAB_TECHNICIAN,ADMIN")]
     public async Task<ActionResult<ApiResponse<LabResultListDto>>> Update(Guid id, [FromBody] LabResultUpdateDto dto)
     {
-        LabResultListDto? updated = await _repo.UpdateAsync(id, dto);
+        LabResultListDto? updated = await _service.UpdateAsync(id, dto);
         if (updated == null)
             return NotFound(ApiResponse<LabResultListDto>.Fail("Lab result not found."));
         return Ok(ApiResponse<LabResultListDto>.Success(updated, "Lab result updated successfully."));
@@ -59,7 +59,7 @@ public class LabResultsController : ControllerBase
     [Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<ApiResponse<string>>> Delete(Guid id)
     {
-        bool ok = await _repo.DeleteAsync(id);
+        bool ok = await _service.DeleteAsync(id);
         if (!ok) return NotFound(ApiResponse<string>.Fail("Lab result not found."));
         return Ok(ApiResponse<string>.Success("deleted", "Lab result deleted successfully."));
     }

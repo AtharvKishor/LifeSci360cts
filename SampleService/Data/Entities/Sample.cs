@@ -27,6 +27,8 @@ public partial class Sample
     [StringLength(50)]
     public string Status { get; set; } = null!;
 
+    public string? Notes { get; set; }
+
     [ForeignKey("CollectedByUserId")]
     [InverseProperty("Samples")]
     public virtual User CollectedByUser { get; set; } = null!;

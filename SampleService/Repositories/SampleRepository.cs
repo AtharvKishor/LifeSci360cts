@@ -13,19 +13,21 @@ public class SampleRepository : ISampleRepository
 
     public async Task<IList<SampleListDto>> GetAllAsync()
     {
-        return await _db.Samples
+        // Materialize entities first (with navigation properties), then project in memory
+        var samples = await _db.Samples
             .AsNoTracking()
-            .Include(s => s.CollectedByUser)
+            .Include(s => s.CollectedByUser).ThenInclude(u => u.Role)
             .OrderByDescending(s => s.CollectedDate)
-            .Select(s => ToDto(s))
-            .ToListAsync();//execute query n return as list
+            .ToListAsync();
+
+        return samples.Select(ToDto).ToList();
     }
 
     public async Task<SampleListDto?> GetByIdAsync(Guid id)
     {
         Sample? sample = await _db.Samples
             .AsNoTracking()
-            .Include(s => s.CollectedByUser)
+            .Include(s => s.CollectedByUser).ThenInclude(u => u.Role)
             .FirstOrDefaultAsync(s => s.SampleId == id);
 
         return sample == null ? null : ToDto(sample);
@@ -33,13 +35,14 @@ public class SampleRepository : ISampleRepository
 
     public async Task<IList<SampleListDto>> GetByEnrollmentAsync(Guid enrollmentId)
     {
-        return await _db.Samples
+        var samples = await _db.Samples
             .AsNoTracking()
-            .Include(s => s.CollectedByUser)
+            .Include(s => s.CollectedByUser).ThenInclude(u => u.Role)
             .Where(s => s.EnrollmentId == enrollmentId)
             .OrderByDescending(s => s.CollectedDate)
-            .Select(s => ToDto(s))
             .ToListAsync();
+
+        return samples.Select(ToDto).ToList();
     }
 
     public async Task<SampleListDto> CreateAsync(SampleCreateDto dto)
@@ -65,7 +68,8 @@ public class SampleRepository : ISampleRepository
         if (sample == null) return null;
 
         if (dto.SampleType != null) sample.SampleType = dto.SampleType;
-        if (dto.Status != null) sample.Status = dto.Status;
+        if (dto.Status     != null) sample.Status     = dto.Status;
+        if (dto.Notes      != null) sample.Notes      = dto.Notes;
 
         await _db.SaveChangesAsync();
         return await GetByIdAsync(id);
@@ -97,8 +101,17 @@ public class SampleRepository : ISampleRepository
         EnrollmentId = s.EnrollmentId,
         CollectedByUserId = s.CollectedByUserId,
         CollectedByUserName = s.CollectedByUser?.Name ?? string.Empty,
-        SampleType = s.SampleType,
+        CollectedByUserRole = FormatRole(s.CollectedByUser?.Role?.RoleName ?? string.Empty),
+        SampleType    = s.SampleType,
         CollectedDate = s.CollectedDate,
-        Status = s.Status
+        Status        = s.Status,
+        Notes         = s.Notes
     };
+
+    // Converts LAB_TECHNICIAN → Lab Technician
+    private static string FormatRole(string role) =>
+        string.Join(" ", role.Split('_')
+            .Select(w => w.Length > 0
+                ? char.ToUpper(w[0]) + w[1..].ToLower()
+                : string.Empty));
 }
