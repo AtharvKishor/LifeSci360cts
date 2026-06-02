@@ -62,6 +62,10 @@ public class PdfReportService : IPdfReportService
                             dashboard.Trends.SitePerformanceScoreChange);
                     });
 
+                    // ── KPI Bar Chart ─────────────────────────────────────
+                    col.Item().Text("KPI Comparison").FontSize(13).Bold();
+                    col.Item().Element(c => KpiBarChart(c, dashboard.CurrentKpis));
+
                     // ── Alerts ────────────────────────────────────────────
                     if (dashboard.Alerts.Count > 0)
                     {
@@ -207,6 +211,9 @@ public class PdfReportService : IPdfReportService
                             r.ConstantItem(200).Text("Site Performance:").Bold();
                             r.RelativeItem().Text($"{report.ParsedMetrics.SitePerformanceScore:F2}%");
                         });
+
+                        col.Item().PaddingTop(6).Text("KPI Comparison").FontSize(13).Bold();
+                        col.Item().Element(c => KpiBarChart(c, report.ParsedMetrics));
                     }
                 });
 
@@ -256,4 +263,43 @@ public class PdfReportService : IPdfReportService
                 c.Item().Text(label).FontSize(8).FontColor(Colors.Grey.Darken1);
                 c.Item().Text(value).FontSize(14).Bold();
             });
+
+    // ── Bar chart ───────────────────────────────────────────────────────────────
+    // Draws four vertical bars (0–100 scale) using native QuestPDF layout —
+    // no image library needed. Bar height is proportional to the KPI value and
+    // colored with the same thresholds as the KPI cards.
+    private const float ChartPlotHeight = 150f;
+
+    private static void KpiBarChart(IContainer container, KpiMetrics kpis) =>
+        container.Border(1).BorderColor(Colors.Grey.Lighten2).Padding(12).Row(row =>
+        {
+            row.Spacing(16);
+            Bar(row.RelativeItem(), "Enrollment",   kpis.EnrollmentRate);
+            Bar(row.RelativeItem(), "Sample Proc.", kpis.SampleProcessingRate);
+            Bar(row.RelativeItem(), "Compliance",   kpis.ComplianceScore);
+            Bar(row.RelativeItem(), "Site Perf.",   kpis.SitePerformanceScore);
+        });
+
+    private static void Bar(IContainer container, string label, double value)
+    {
+        var clamped   = Math.Clamp(value, 0, 100);
+        var barHeight = (float)(clamped / 100.0 * ChartPlotHeight);
+        var color = value < 50 ? Colors.Red.Medium
+                  : value < 70 ? Colors.Orange.Medium
+                  : Colors.Green.Medium;
+
+        container.Column(c =>
+        {
+            // value label above the bar
+            c.Item().AlignCenter().Text($"{value:F0}%").FontSize(9).Bold();
+
+            // plot area (grey track = full 0–100 scale) with the bar pinned to the bottom
+            c.Item().Height(ChartPlotHeight).Background(Colors.Grey.Lighten3).AlignBottom()
+                .Height(barHeight).Background(color);
+
+            // category label under the bar
+            c.Item().PaddingTop(5).AlignCenter()
+                .Text(label).FontSize(8).FontColor(Colors.Grey.Darken1);
+        });
+    }
 }

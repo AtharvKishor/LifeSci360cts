@@ -55,7 +55,7 @@ public class KpiReportController(
 
     // POST api/reporting/reports
     [HttpPost("reports")]
-    [Authorize(Roles = "DataManager,Admin")]
+    [Authorize(Roles = "DATA_MANAGER,ADMIN,SYSTEM_ADMIN")]
     public async Task<IActionResult> Create([FromBody] CreateKpiReportDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -84,7 +84,7 @@ public class KpiReportController(
 
     // PUT api/reporting/reports/{id}
     [HttpPut("reports/{id:guid}")]
-    [Authorize(Roles = "DataManager,Admin")]
+    [Authorize(Roles = "DATA_MANAGER,ADMIN,SYSTEM_ADMIN")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateKpiReportDto dto)
     {
         var report = await repo.UpdateAsync(id, dto);
@@ -98,7 +98,7 @@ public class KpiReportController(
 
     // DELETE api/reporting/reports/{id}
     [HttpDelete("reports/{id:guid}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "ADMIN,SYSTEM_ADMIN")]
     public async Task<IActionResult> Delete(Guid id)
     {
         var deleted = await repo.DeleteAsync(id);

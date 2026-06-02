@@ -64,6 +64,7 @@ export class AuthService {
   getRole():   string | null { return localStorage.getItem('role'); }
   getEmail():  string | null { return localStorage.getItem('email'); }
   getName():   string | null { return localStorage.getItem('name'); }
+  getUserId(): string | null { return localStorage.getItem('userId'); }
   isLoggedIn(): boolean      { return !!this.getToken(); }
 
   clearSession(): void { localStorage.clear(); this.router.navigate(['/login']); }
