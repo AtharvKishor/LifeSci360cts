@@ -45,8 +45,6 @@ export interface ActiveSession {
   name: string; email: string; role: string; ipAddress?: string;
   loginTime: string; expiresAt: string; status: string;
 }
-
-// What we RECEIVE for each audit log entry
 export interface AuditLogEntry {
   logId: number; actorName: string; actorEmail: string;
   action: string; description: string; targetUserName?: string;
@@ -97,8 +95,6 @@ export class AuthService {
     return this.http.post<EnrolledUser>(`${this.apiUrl}/enroll`, dto);
   }
 
-  // ── UPDATE USER (Admin only) ──────────────────────────────
-  // Updates an existing user's name, phone, role, or active status.
   updateUser(userId: string, dto: UpdateUserRequest): Observable<EnrolledUser> {
     return this.http.put<EnrolledUser>(`${this.apiUrl}/users/${userId}`, dto);
   }

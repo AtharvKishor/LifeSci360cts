@@ -1,4 +1,4 @@
-import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule, TitleCasePipe } from '@angular/common';
@@ -29,6 +29,6 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     TitleCasePipe
   ],
-  bootstrap: [App]
+  bootstrap: [AppComponent]
 })
 export class AppModule { }

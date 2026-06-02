@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using SampleService.Data;
+using SampleService.Extensions;
 using SampleService.Repositories;
 using SampleService.Services;
 using Shared.Extensions;
@@ -55,6 +55,9 @@ builder.Services.AddScoped<ILabResultService, LabResultService>();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
+builder.Services.AddSharedControllers();
+builder.Services.AddSwaggerWithJwt();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -63,5 +66,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors("Angular");
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseSwaggerInDevelopment();
+app.UseSharedMiddleware();
 app.MapControllers();
 app.Run();

@@ -10,6 +10,10 @@ using Shared.Extensions;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddAngularCors(builder.Configuration);
+builder.Services.AddDbContext<ServicesDbContext>(opt =>
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("ServicesDb")));
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
 // CORS
 builder.Services.AddAngularCors(builder.Configuration);
@@ -83,5 +87,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors("Angular");
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseSwaggerInDevelopment("AuthService v1");
+app.UseSharedMiddleware();
 app.MapControllers();
 app.Run();
