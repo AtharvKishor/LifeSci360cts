@@ -1,7 +1,8 @@
-import { Component, OnInit,ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { finalize, timeout } from 'rxjs';
+import { finalize, timeout, Subscription } from 'rxjs';
 import { AuthService, EnrolledUser, RoleOption, ActiveSession, AuditLogEntry, UpdateUserRequest } from '../../services/auth.service';
+import { TrialsNavService } from '../../services/trials-nav.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -9,7 +10,8 @@ import { AuthService, EnrolledUser, RoleOption, ActiveSession, AuditLogEntry, Up
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
+  private navSub?: Subscription;
   email = '';
   role  = '';
   activeNav = 'dashboard';
@@ -62,7 +64,12 @@ export class DashboardComponent implements OnInit {
     { key: 'settings',  label: 'Settings',        icon: 'settings' },
   ];
 
-  constructor(private auth: AuthService, private fb: FormBuilder, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private auth: AuthService,
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef,
+    private trialsNav: TrialsNavService
+  ) {}
 
   ngOnInit(): void {
     this.email = this.auth.getEmail() ?? '';
@@ -81,10 +88,37 @@ export class DashboardComponent implements OnInit {
       isActive: [true]
     });
     if (this.isAdmin) this.loadDashboardData();
+    if (this.isClinicalTrialManager && !this.isAdmin) this.activeNav = 'trials';
+
+    // Restore tab after returning from a separate page (e.g. visit-detail)
+    const pending = this.trialsNav.consumePending();
+    if (pending) {
+      this.activeNav = 'trials';
+      this.trialsView = pending;
+    }
+
+    this.navSub = this.trialsNav.nav$.subscribe(view => {
+      if (!view) return;
+      this.activeNav = 'trials';
+      this.trialsView = view;
+      this.cdr.detectChanges();
+    });
+  }
+
+  ngOnDestroy() {
+    this.navSub?.unsubscribe();
   }
 
   get isSystemAdmin(): boolean { return this.role === 'SYSTEM_ADMIN'; }
   get isAdmin(): boolean { return this.role === 'ADMIN' || this.isSystemAdmin; }
+  get isClinicalTrialManager(): boolean {
+    const r = (this.role || '').toUpperCase();
+    return r === 'CLINICAL_TRIAL' || r === 'CLINICAL_TRIAL_MANAGER' || r.startsWith('CLINICAL');
+  }
+  get canAccessTrials(): boolean { return this.isAdmin || this.isClinicalTrialManager; }
+
+  trialsView = 'patients-list';
+  setTrialsView(view: string) { this.trialsView = view; }
 
   canEdit(user: EnrolledUser): boolean {
     return user.role?.toUpperCase() !== 'SYSTEM_ADMIN';

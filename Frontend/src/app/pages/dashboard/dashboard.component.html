@@ -348,8 +348,79 @@
       </div>
     </div>
 
+    <!-- ══ CLINICAL TRIALS ══ -->
+    <div class="content" *ngIf="activeNav === 'trials'" style="overflow-y:auto">
+
+      <!-- Access denied -->
+      <div style="padding:1.5rem 1.75rem" *ngIf="!canAccessTrials">
+        <div class="access-denied">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <h3>Access Restricted</h3>
+          <p>Only Admins and Clinical Trial Managers can access this module.</p>
+        </div>
+      </div>
+
+      <ng-container *ngIf="canAccessTrials">
+
+        <!-- Sub-navigation tab bar -->
+        <div style="display:flex;align-items:center;gap:4px;padding:10px 16px;background:#fff;border-bottom:1px solid #ddd8d0;flex-wrap:wrap">
+          <button (click)="setTrialsView('patients-list')"
+            style="padding:6px 14px;border-radius:8px;border:1px solid transparent;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s"
+            [style.background]="trialsView==='patients-list' ? '#1b3a2d' : '#f5f3ef'"
+            [style.color]="trialsView==='patients-list' ? '#fff' : '#1a1a1a'"
+            [style.border-color]="trialsView==='patients-list' ? '#1b3a2d' : '#ddd8d0'">
+            Patients
+          </button>
+          <button (click)="setTrialsView('add-patient')"
+            style="padding:6px 14px;border-radius:8px;border:1px solid transparent;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s"
+            [style.background]="trialsView==='add-patient' ? '#1b3a2d' : '#f5f3ef'"
+            [style.color]="trialsView==='add-patient' ? '#fff' : '#1a1a1a'"
+            [style.border-color]="trialsView==='add-patient' ? '#1b3a2d' : '#ddd8d0'">
+            Add Patient
+          </button>
+          <button (click)="setTrialsView('enroll-patient')"
+            style="padding:6px 14px;border-radius:8px;border:1px solid transparent;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s"
+            [style.background]="trialsView==='enroll-patient' ? '#1b3a2d' : '#f5f3ef'"
+            [style.color]="trialsView==='enroll-patient' ? '#fff' : '#1a1a1a'"
+            [style.border-color]="trialsView==='enroll-patient' ? '#1b3a2d' : '#ddd8d0'">
+            Enroll Patient
+          </button>
+          <button (click)="setTrialsView('protocol-visits')"
+            style="padding:6px 14px;border-radius:8px;border:1px solid transparent;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s"
+            [style.background]="trialsView==='protocol-visits' ? '#1b3a2d' : '#f5f3ef'"
+            [style.color]="trialsView==='protocol-visits' ? '#fff' : '#1a1a1a'"
+            [style.border-color]="trialsView==='protocol-visits' ? '#1b3a2d' : '#ddd8d0'">
+            Schedule Visits
+          </button>
+          <button (click)="setTrialsView('visits')"
+            style="padding:6px 14px;border-radius:8px;border:1px solid transparent;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s"
+            [style.background]="trialsView==='visits' ? '#1b3a2d' : '#f5f3ef'"
+            [style.color]="trialsView==='visits' ? '#fff' : '#1a1a1a'"
+            [style.border-color]="trialsView==='visits' ? '#1b3a2d' : '#ddd8d0'">
+            Visit Management
+          </button>
+          <button (click)="setTrialsView('mark-visits')"
+            style="padding:6px 14px;border-radius:8px;border:1px solid transparent;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s"
+            [style.background]="trialsView==='mark-visits' ? '#1b3a2d' : '#f5f3ef'"
+            [style.color]="trialsView==='mark-visits' ? '#fff' : '#1a1a1a'"
+            [style.border-color]="trialsView==='mark-visits' ? '#1b3a2d' : '#ddd8d0'">
+            Mark Visits
+          </button>
+        </div>
+
+        <!-- Embedded patient module components -->
+        <app-patients-list    *ngIf="trialsView === 'patients-list'"></app-patients-list>
+        <app-add-patient      *ngIf="trialsView === 'add-patient'"></app-add-patient>
+        <app-enroll-patient   *ngIf="trialsView === 'enroll-patient'"></app-enroll-patient>
+        <app-protocol-visits  *ngIf="trialsView === 'protocol-visits'"></app-protocol-visits>
+        <app-visits           *ngIf="trialsView === 'visits'"></app-visits>
+        <app-mark-visits      *ngIf="trialsView === 'mark-visits'"></app-mark-visits>
+
+      </ng-container>
+    </div>
+
     <!-- ══ OTHER SECTIONS ══ -->
-    <div class="content placeholder-content" *ngIf="activeNav !== 'dashboard' && activeNav !== 'users' && activeNav !== 'audit'">
+    <div class="content placeholder-content" *ngIf="activeNav !== 'dashboard' && activeNav !== 'users' && activeNav !== 'audit' && activeNav !== 'trials'">
       <div class="placeholder-card">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
         <h3>{{ activeNav | titlecase }} Module</h3>

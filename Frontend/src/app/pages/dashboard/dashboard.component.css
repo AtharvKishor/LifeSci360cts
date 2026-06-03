@@ -283,3 +283,5 @@ tbody tr:hover td { background: #faf9f7; }
 /* Responsive */
 @media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2,1fr); } .qa-grid { grid-template-columns: repeat(2,1fr); } }
 @media (max-width: 640px)  { .stats-grid { grid-template-columns: 1fr; } .qa-grid { grid-template-columns: 1fr; } .enroll-panel { width: 100%; } .sidebar { width: var(--sidebar-cw); min-width: var(--sidebar-cw); } .audit-filter-wrap { min-width: unset; width: 100%; } }
+
+/* Embedded component overrides are in global styles.css */

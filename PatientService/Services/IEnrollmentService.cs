@@ -1,4 +1,4 @@
-﻿using Shared.DTOs;
+using Shared.DTOs;
 
 namespace PatientService.Services;
 
@@ -9,9 +9,7 @@ public interface IEnrollmentService
     Task<(bool Success, string? Error, EnrollmentDto? Data)> EnrollAsync(
         Guid patientId, Guid protocolSiteId);
     Task<(bool Success, string? Error)> WithdrawAsync(Guid id);
-    Task<IEnumerable<object>> GetProtocolsAsync();
-    Task<IEnumerable<object>> GetSitesByProtocolAsync(Guid protocolId);
-
-    // ✅ NEW
+    Task<IEnumerable<ProtocolDto>> GetProtocolsAsync();
+    Task<IEnumerable<ProtocolSiteDto>> GetSitesByProtocolAsync(Guid protocolId);
     Task<int> GetActivePatientCountAsync(Guid protocolId);
 }

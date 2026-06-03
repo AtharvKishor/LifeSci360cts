@@ -12,4 +12,8 @@ public interface IVisitRepository
     Task BulkCreateAsync(IEnumerable<Visit> visits);
     Task UpdateAsync(Visit visit);
     Task BulkUpdateAsync(IEnumerable<Visit> visits);
+
+    /// Returns all SCHEDULED/RESCHEDULED visits across all enrollments
+    /// of the given protocol — used to copy template visits for new patients.
+    Task<IEnumerable<Visit>> GetScheduledByProtocolAsync(Guid protocolId);
 }
