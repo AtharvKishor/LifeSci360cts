@@ -12,5 +12,5 @@ public interface IPatientService
         Guid id, string name, DateOnly dateOfBirth, string? contactInfo);
 
     // ✅ NEW
-    Task<(bool Success, string? Error)> DeactivateAsync(Guid id, string reason);
+    Task<(bool Success, string? Error)> DeactivateAsync(Guid id);
 }

@@ -19,6 +19,14 @@ import { NotificationsComponent } from './modules/notifications/notifications.co
 import { TrialsComponent } from './modules/trials/trials.component';
 import { ProtocolsComponent } from './modules/protocols/protocols.component';
 import { SettingsComponent } from './modules/settings/settings.component';
+import { PatientsList }    from './pages/modules/patientmodule/patients-list/patients-list';
+import { AddPatient }      from './pages/modules/patientmodule/add-patient/add-patient';
+import { EnrollPatient }   from './pages/modules/patientmodule/enroll-patient/enroll-patient';
+import { PatientDetail }   from './pages/modules/patientmodule/patient-detail/patient-detail';
+import { ProtocolVisits }  from './pages/modules/patientmodule/protocol-visits/protocol-visits';
+import { Visits }          from './pages/modules/patientmodule/visits/visits';
+import { VisitDetail }     from './pages/modules/patientmodule/visit-detail/visit-detail';
+import { MarkVisits }      from './pages/modules/patientmodule/mark-visits/mark-visits';
 
 @NgModule({
   declarations: [
@@ -34,6 +42,14 @@ import { SettingsComponent } from './modules/settings/settings.component';
     TrialsComponent,
     ProtocolsComponent,
     SettingsComponent,
+    PatientsList,
+    AddPatient,
+    EnrollPatient,
+    PatientDetail,
+    ProtocolVisits,
+    Visits,
+    VisitDetail,
+    MarkVisits
   ],
   imports: [
     BrowserModule,

@@ -43,10 +43,15 @@ public class PatientRepository : IPatientRepository
         await _ctx.SaveChangesAsync();
     }
 
-    // ✅ Updated: only block duplicate email for ACTIVE patients
+    // Checks email existence with no status filter — status decision is the service's concern
     public async Task<bool> EmailExistsAsync(string email, Guid? excludeId = null)
         => await _ctx.Patients.AnyAsync(p =>
                p.ContactInfo == email &&
-               p.PatientStatus == "ACTIVE" &&
+               (excludeId == null || p.PatientId != excludeId));
+
+    // Returns the patient with this email so the service can inspect their status
+    public async Task<Patient?> GetByEmailAsync(string email, Guid? excludeId = null)
+        => await _ctx.Patients.FirstOrDefaultAsync(p =>
+               p.ContactInfo == email &&
                (excludeId == null || p.PatientId != excludeId));
 }

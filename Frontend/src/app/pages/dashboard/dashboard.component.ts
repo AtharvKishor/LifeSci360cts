@@ -5,6 +5,11 @@ import { SampleService, SampleListDto } from '../../services/sample.service';
 import { NotificationService } from '../../services/notification.service';
 import { UsersComponent } from '../../modules/users/users.component';
 import { SamplesComponent } from '../../modules/samples/samples/samples.component';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { finalize, timeout, Subscription } from 'rxjs';
+import { AuthService, EnrolledUser, RoleOption, ActiveSession, AuditLogEntry, UpdateUserRequest } from '../../services/auth.service';
+import { TrialsNavService } from '../../services/trials-nav.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,6 +21,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   @ViewChild('usersComp')   usersComp!: UsersComponent;
   @ViewChild('samplesComp') samplesComp!: SamplesComponent;
 
+  private navSub?: Subscription;
   email = '';
   role  = '';
   name  = '';
@@ -60,7 +66,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private auth: AuthService,
     private sampleSvc: SampleService,
     private notify: NotificationService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private fb: FormBuilder,
+    private trialsNav: TrialsNavService
   ) {}
 
   @HostListener('document:click')
@@ -86,9 +94,41 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.sessionsLoading = false;
       this.loadSamples();
     }
+    
+    this.enrollForm = this.fb.group({
+      name:     ['', [Validators.required, Validators.minLength(2)]],
+      email:    ['', [Validators.required, Validators.email]],
+      phone:    [''],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      roleName: ['', Validators.required]
+    });
+    this.editForm = this.fb.group({
+      name:     ['', [Validators.required, Validators.minLength(2)]],
+      phone:    [''],
+      roleName: ['', Validators.required],
+      isActive: [true]
+    });
+    if (this.isAdmin) this.loadDashboardData();
+    if (this.isClinicalTrialManager && !this.isAdmin) this.activeNav = 'trials';
+    
+    // Restore tab after returning from a separate page (e.g. visit-detail)
+    const pending = this.trialsNav.consumePending();
+    if (pending) {
+      this.activeNav = 'trials';
+      this.trialsView = pending;
+    }
+    
+    this.navSub = this.trialsNav.nav$.subscribe(view => {
+      if (!view) return;
+      this.activeNav = 'trials';
+      this.trialsView = view;
+      this.cdr.detectChanges();
+    });
+  }
   }
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
+    this.navSub?.unsubscribe();
     if (this.unreadTimer) clearInterval(this.unreadTimer);
   }
 
@@ -96,6 +136,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   get isAdmin(): boolean { return this.role === 'ADMIN' || this.isSystemAdmin; }
   get currentUserId(): string { return localStorage.getItem('userId') ?? ''; }
   get canCreateSample(): boolean { return this.role === 'LAB_TECHNICIAN' || this.isAdmin; }
+  get isClinicalTrialManager(): boolean {
+    const r = (this.role || '').toUpperCase();
+    return r === 'CLINICAL_TRIAL' || r === 'CLINICAL_TRIAL_MANAGER' || r.startsWith('CLINICAL');
+  }
+  get canAccessTrials(): boolean { return this.isAdmin || this.isClinicalTrialManager; }
+
+  trialsView = 'patients-list';
+  setTrialsView(view: string) { this.trialsView = view; }
 
   get initials(): string {
     const n = this.name || this.email;

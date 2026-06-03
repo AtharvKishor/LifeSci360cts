@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using PatientService.Services;
 using Shared.CL;
 using Shared.DTOs;
@@ -34,7 +34,7 @@ public class PatientController : ControllerBase
 
     [HttpPost]
     public async Task<ActionResult<ApiResponse<PatientDto>>> Create(
-        [FromBody] CreatePatientRequest req)
+        [FromBody] CreatePatientDto req)
     {
         var (success, error, data) = await _service.CreateAsync(
             req.Name, req.DateOfBirth, req.ContactInfo);
@@ -49,7 +49,7 @@ public class PatientController : ControllerBase
 
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<ApiResponse<PatientDto>>> Update(
-        Guid id, [FromBody] UpdatePatientRequest req)
+        Guid id, [FromBody] UpdatePatientDto req)
     {
         var (success, error, data) = await _service.UpdateAsync(
             id, req.Name, req.DateOfBirth, req.ContactInfo);
@@ -62,12 +62,10 @@ public class PatientController : ControllerBase
         return Ok(ApiResponse<PatientDto>.Success(data!, "Patient updated."));
     }
 
-    // ✅ NEW: deactivate patient
     [HttpPut("{id:guid}/deactivate")]
-    public async Task<ActionResult<ApiResponse<string>>> Deactivate(
-        Guid id, [FromBody] DeactivatePatientRequest req)
+    public async Task<ActionResult<ApiResponse<string>>> Deactivate(Guid id)
     {
-        var (success, error) = await _service.DeactivateAsync(id, req.Reason);
+        var (success, error) = await _service.DeactivateAsync(id);
 
         if (!success)
             return error == "Patient not found."
@@ -77,12 +75,3 @@ public class PatientController : ControllerBase
         return Ok(ApiResponse<string>.Success("INACTIVE", "Patient deactivated."));
     }
 }
-
-public record CreatePatientRequest(
-    string Name, DateOnly DateOfBirth, string? ContactInfo);
-
-public record UpdatePatientRequest(
-    string Name, DateOnly DateOfBirth, string? ContactInfo);
-
-// ✅ NEW
-public record DeactivatePatientRequest(string Reason);

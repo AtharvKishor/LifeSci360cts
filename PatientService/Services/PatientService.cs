@@ -1,5 +1,3 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PatientService.Data;
 using PatientService.Data.Entities;
 using PatientService.Repository;
 using Shared.DTOs;
@@ -8,13 +6,18 @@ namespace PatientService.Services;
 
 public class PatientService : IPatientService
 {
-    private readonly IPatientRepository _repo;
-    private readonly ServicesDbContext _ctx;
+    private readonly IPatientRepository    _repo;
+    private readonly IEnrollmentRepository _enrollRepo;
+    private readonly IVisitRepository      _visitRepo;
 
-    public PatientService(IPatientRepository repo, ServicesDbContext ctx)
+    public PatientService(
+        IPatientRepository    repo,
+        IEnrollmentRepository enrollRepo,
+        IVisitRepository      visitRepo)
     {
-        _repo = repo;
-        _ctx = ctx;
+        _repo       = repo;
+        _enrollRepo = enrollRepo;
+        _visitRepo  = visitRepo;
     }
 
     public async Task<IEnumerable<PatientDto>> GetAllAsync()
@@ -32,17 +35,31 @@ public class PatientService : IPatientService
     public async Task<(bool Success, string? Error, PatientDto? Data)> CreateAsync(
         string name, DateOnly dateOfBirth, string? contactInfo)
     {
-        if (!string.IsNullOrWhiteSpace(contactInfo) &&
-            await _repo.EmailExistsAsync(contactInfo))
-            return (false, "A patient with this email already exists.", null);
+        // ── Field-level validation ───────────────────────────────────────
+        if (string.IsNullOrWhiteSpace(name))
+            return (false, "Patient name is required.", null);
+
+        if (dateOfBirth >= DateOnly.FromDateTime(DateTime.UtcNow))
+            return (false, "Date of birth cannot be today or a future date.", null);
+
+        if (!string.IsNullOrWhiteSpace(contactInfo))
+        {
+            if (!IsValidEmail(contactInfo))
+                return (false, "Please provide a valid email address.", null);
+
+            // Service decides: email is blocked only when the existing patient is ACTIVE
+            var existing = await _repo.GetByEmailAsync(contactInfo);
+            if (existing?.PatientStatus == "ACTIVE")
+                return (false, "A patient with this email already exists.", null);
+        }
 
         var patient = new Patient
         {
-            Name = name,
-            DateOfBirth = dateOfBirth,
-            ContactInfo = contactInfo,
+            Name          = name,
+            DateOfBirth   = dateOfBirth,
+            ContactInfo   = contactInfo,
             PatientStatus = "ACTIVE",
-            CreatedAt = DateTime.UtcNow
+            CreatedAt     = DateTime.UtcNow
         };
 
         var created = await _repo.CreateAsync(patient);
@@ -52,15 +69,28 @@ public class PatientService : IPatientService
     public async Task<(bool Success, string? Error, PatientDto? Data)> UpdateAsync(
         Guid id, string name, DateOnly dateOfBirth, string? contactInfo)
     {
+        if (string.IsNullOrWhiteSpace(name))
+            return (false, "Patient name is required.", null);
+
+        if (dateOfBirth >= DateOnly.FromDateTime(DateTime.UtcNow))
+            return (false, "Date of birth cannot be today or a future date.", null);
+
         var patient = await _repo.GetByIdAsync(id);
         if (patient is null)
             return (false, "Patient not found.", null);
 
-        if (!string.IsNullOrWhiteSpace(contactInfo) &&
-            await _repo.EmailExistsAsync(contactInfo, id))
-            return (false, "Email already used by another patient.", null);
+        if (!string.IsNullOrWhiteSpace(contactInfo))
+        {
+            if (!IsValidEmail(contactInfo))
+                return (false, "Please provide a valid email address.", null);
 
-        patient.Name = name;
+            // Service decides: email is blocked only if another ACTIVE patient uses it
+            var existing = await _repo.GetByEmailAsync(contactInfo, excludeId: id);
+            if (existing?.PatientStatus == "ACTIVE")
+                return (false, "Email already used by another patient.", null);
+        }
+
+        patient.Name        = name;
         patient.DateOfBirth = dateOfBirth;
         patient.ContactInfo = contactInfo;
 
@@ -68,8 +98,7 @@ public class PatientService : IPatientService
         return (true, null, MapToDto(patient));
     }
 
-    public async Task<(bool Success, string? Error)> DeactivateAsync(
-        Guid id, string reason)
+    public async Task<(bool Success, string? Error)> DeactivateAsync(Guid id)
     {
         var patient = await _repo.GetByIdAsync(id);
         if (patient is null)
@@ -78,35 +107,47 @@ public class PatientService : IPatientService
         if (patient.PatientStatus == "INACTIVE")
             return (false, "Patient is already inactive.");
 
-        var activeEnrollment = await _ctx.PatientEnrollments
-            .FirstOrDefaultAsync(e =>
-                e.PatientId == id &&
-                e.EnrollmentStatus == "ACTIVE");
-
+        // Find active enrollment through EnrollmentRepository
+        var activeEnrollment = await _enrollRepo.GetActiveByPatientAsync(id);
         if (activeEnrollment is not null)
         {
-            // ✅ Cancel all scheduled/rescheduled visits
-            var visits = await _ctx.Visits
-                .Where(v => v.EnrollmentId == activeEnrollment.EnrollmentId &&
-                       (v.VisitStatus == "SCHEDULED" || v.VisitStatus == "RESCHEDULED"))
-                .ToListAsync();
+            // Cancel all scheduled/rescheduled visits through VisitRepository
+            var visits = (await _visitRepo.GetByEnrollmentIdAsync(activeEnrollment.EnrollmentId))
+                .Where(v => v.VisitStatus is "SCHEDULED" or "RESCHEDULED")
+                .ToList();
 
             foreach (var v in visits)
                 v.VisitStatus = "CANCELLED";
 
             if (visits.Any())
-                _ctx.Visits.UpdateRange(visits);
+                await _visitRepo.BulkUpdateAsync(visits);
 
+            // Withdraw enrollment through EnrollmentRepository
             activeEnrollment.EnrollmentStatus = "WITHDRAWN";
-            _ctx.PatientEnrollments.Update(activeEnrollment);
+            await _enrollRepo.UpdateAsync(activeEnrollment);
         }
 
         patient.PatientStatus = "INACTIVE";
         await _repo.UpdateAsync(patient);
-        await _ctx.SaveChangesAsync();
-
         return (true, null);
     }
+
+    // ── Helpers ──────────────────────────────────────────────
+
+    private static bool IsValidEmail(string email)
+    {
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(email);
+            return addr.Address == email.Trim();
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    // ── Mapping ──────────────────────────────────────────────
 
     private static PatientDto MapToDto(Patient p)
     {
@@ -114,14 +155,14 @@ public class PatientService : IPatientService
             .OrderByDescending(e => e.EnrolledAt)
             .FirstOrDefault();
 
-        string status = p.PatientStatus == "INACTIVE"
+        string enrollmentStatus = p.PatientStatus == "INACTIVE"
             ? "Inactive"
             : enrollment?.EnrollmentStatus switch
             {
-                "ACTIVE" => "Active",
+                "ACTIVE"    => "Active",
                 "COMPLETED" => "Completed",
                 "WITHDRAWN" => "Withdrawn",
-                _ => "Not enrolled"
+                _           => "Not enrolled"
             };
 
         var previousProtocols = p.PatientEnrollments
@@ -132,17 +173,17 @@ public class PatientService : IPatientService
 
         return new PatientDto
         {
-            PatientId = p.PatientId,
-            Name = p.Name,
-            DateOfBirth = p.DateOfBirth,
-            ContactInfo = p.ContactInfo,
-            PatientStatus = p.PatientStatus,
-            CreatedAt = p.CreatedAt,
-            EnrollmentStatus = status,
-            EnrollmentId = enrollment?.EnrollmentId,
-            ProtocolTitle = enrollment?.ProtocolSite?.Protocol?.Title,
-            SiteName = enrollment?.ProtocolSite?.Site?.Name,
-            EnrolledAt = enrollment?.EnrolledAt,
+            PatientId        = p.PatientId,
+            Name             = p.Name,
+            DateOfBirth      = p.DateOfBirth,
+            ContactInfo      = p.ContactInfo,
+            PatientStatus    = p.PatientStatus,
+            CreatedAt        = p.CreatedAt,
+            EnrollmentStatus = enrollmentStatus,
+            EnrollmentId     = enrollment?.EnrollmentId,
+            ProtocolTitle    = enrollment?.ProtocolSite?.Protocol?.Title,
+            SiteName         = enrollment?.ProtocolSite?.Site?.Name,
+            EnrolledAt       = enrollment?.EnrolledAt,
             PreviousProtocols = previousProtocols
         };
     }

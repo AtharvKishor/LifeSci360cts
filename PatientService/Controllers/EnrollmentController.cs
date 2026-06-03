@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using PatientService.Services;
 using Shared.CL;
 using Shared.DTOs;
@@ -34,7 +34,7 @@ public class EnrollmentController : ControllerBase
 
     [HttpPost]
     public async Task<ActionResult<ApiResponse<EnrollmentDto>>> Enroll(
-        [FromBody] EnrollRequest req)
+        [FromBody] EnrollRequestDto req)
     {
         var (success, error, data) = await _service.EnrollAsync(
             req.PatientId, req.ProtocolSiteId);
@@ -61,21 +61,20 @@ public class EnrollmentController : ControllerBase
     }
 
     [HttpGet("protocols")]
-    public async Task<ActionResult<ApiResponse<IEnumerable<object>>>> GetProtocols()
+    public async Task<ActionResult<ApiResponse<IEnumerable<ProtocolDto>>>> GetProtocols()
     {
         var result = await _service.GetProtocolsAsync();
-        return Ok(ApiResponse<IEnumerable<object>>.Success(result));
+        return Ok(ApiResponse<IEnumerable<ProtocolDto>>.Success(result));
     }
 
     [HttpGet("protocols/{protocolId:guid}/sites")]
-    public async Task<ActionResult<ApiResponse<IEnumerable<object>>>> GetSites(
+    public async Task<ActionResult<ApiResponse<IEnumerable<ProtocolSiteDto>>>> GetSites(
         Guid protocolId)
     {
         var result = await _service.GetSitesByProtocolAsync(protocolId);
-        return Ok(ApiResponse<IEnumerable<object>>.Success(result));
+        return Ok(ApiResponse<IEnumerable<ProtocolSiteDto>>.Success(result));
     }
 
-    // ✅ NEW: count of active patients enrolled in a protocol
     [HttpGet("protocols/{protocolId:guid}/active-count")]
     public async Task<ActionResult<ApiResponse<int>>> GetActivePatientCount(
         Guid protocolId)
@@ -84,5 +83,3 @@ public class EnrollmentController : ControllerBase
         return Ok(ApiResponse<int>.Success(count));
     }
 }
-
-public record EnrollRequest(Guid PatientId, Guid ProtocolSiteId);

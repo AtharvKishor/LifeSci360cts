@@ -39,7 +39,7 @@ public class VisitRepository : IVisitRepository
             q = q.Where(v => v.Enrollment.ProtocolSiteId == protocolSiteId.Value);
 
         if (!string.IsNullOrWhiteSpace(status))
-            q = q.Where(v => v.VisitStatus == status.ToUpper());
+            q = q.Where(v => v.VisitStatus == status); // caller is responsible for correct casing
 
         return await q.OrderBy(v => v.VisitDate).ToListAsync();
     }
@@ -65,7 +65,7 @@ public class VisitRepository : IVisitRepository
         await _ctx.Visits.AddRangeAsync(visits);
         await _ctx.SaveChangesAsync();
     }
-
+     
     public async Task UpdateAsync(Visit visit)
     {
         _ctx.Visits.Update(visit);
@@ -77,4 +77,12 @@ public class VisitRepository : IVisitRepository
         _ctx.Visits.UpdateRange(visits);
         await _ctx.SaveChangesAsync();
     }
+
+    public async Task<IEnumerable<Visit>> GetScheduledByProtocolAsync(Guid protocolId)
+        => await _ctx.Visits
+               .Where(v =>
+                   v.Enrollment.ProtocolSite.ProtocolId == protocolId &&
+                   (v.VisitStatus == "SCHEDULED" || v.VisitStatus == "RESCHEDULED"))
+               .OrderBy(v => v.VisitDate)
+               .ToListAsync();
 }
