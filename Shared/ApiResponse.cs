@@ -1,14 +1,27 @@
+using System.Text.Json.Serialization;
+
 namespace Shared.CL;
 
 public class ApiResponse<T>
 {
-    public bool IsSuccess { get; set; }
-    public string Message { get; set; } = string.Empty;
-    public T? Data { get; set; }
+    public bool IsSuccess { get; init; }
+    public string Message { get; init; } = string.Empty;
 
-    public static ApiResponse<T> Success(T data, string message = "Success") =>
-        new() { IsSuccess = true, Data = data, Message = message };
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public T? Data { get; init; }
 
-    public static ApiResponse<T> Fail(string message) =>
-        new() { IsSuccess = false, Message = message };
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Errors { get; init; }
+
+    public static ApiResponse<T> Ok(T data, string message = "Success")
+        => new() { IsSuccess = true, Message = message, Data = data };
+
+    public static ApiResponse<T> OkOnly(string message = "Success")
+        => new() { IsSuccess = true, Message = message };
+
+    public static ApiResponse<T> Success(T data, string message = "Success")
+        => new() { IsSuccess = true, Data = data, Message = message };
+
+    public static ApiResponse<T> Fail(string message, List<string>? errors = null)
+        => new() { IsSuccess = false, Message = message, Errors = errors };
 }

@@ -17,6 +17,9 @@ public partial class Site
     [StringLength(255)]
     public string? Location { get; set; }
 
+    // Soft delete flag — column exists in DB
+    public bool IsActive { get; set; } = true;
+
     [InverseProperty("Site")]
     public virtual ICollection<ProtocolSite> ProtocolSites { get; set; } = new List<ProtocolSite>();
 }

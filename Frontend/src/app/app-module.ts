@@ -9,6 +9,10 @@ import { AppComponent } from './app';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { LoginComponent } from './pages/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { ProtocolsComponent }    from './pages/module/protocol/protocols/protocols.component';
+import { CreateProtocolComponent } from './pages/module/protocol/create-protocol/create-protocol.component';
+import { SitesComponent }        from './pages/module/protocol/sites/sites.component';
+import { CreateSiteComponent }   from './pages/module/protocol/create-site/create-site.component';
 
 import { UsersComponent } from './modules/users/users.component';
 import { AuditComponent } from './modules/audit/audit.component';
@@ -50,6 +54,10 @@ import { MarkVisits }      from './pages/modules/patientmodule/mark-visits/mark-
     Visits,
     VisitDetail,
     MarkVisits
+    ProtocolsComponent,
+    CreateProtocolComponent,
+    SitesComponent,
+    CreateSiteComponent
   ],
   imports: [
     BrowserModule,

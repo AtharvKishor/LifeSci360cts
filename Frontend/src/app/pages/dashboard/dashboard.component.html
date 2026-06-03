@@ -30,6 +30,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
           <span class="nav-badge" *ngIf="notifUnread > 0">{{ notifUnread > 99 ? '99+' : notifUnread }}</span>
         </span>
+        <svg *ngIf="item.icon==='location'"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         <svg *ngIf="item.icon==='settings'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
         <span class="nav-label" *ngIf="!sidebarCollapsed">{{ item.label }}</span>
       </button>
@@ -63,6 +64,17 @@
              activeNav === 'trials' ? 'Clinical Trials' : activeNav === 'samples' ? 'Lab & Samples' :
              activeNav === 'protocols' ? 'Protocols' : activeNav === 'reports' ? 'Reports' :
              activeNav === 'notifications' ? 'Notifications & Alerts' : 'Settings' }}
+          {{ activeNav === 'dashboard'        ? 'Dashboard'
+           : activeNav === 'users'           ? 'User Management'
+           : activeNav === 'audit'           ? 'Audit Log'
+           : activeNav === 'trials'          ? 'Clinical Trials'
+           : activeNav === 'samples'         ? 'Lab & Samples'
+           : activeNav === 'protocols'       ? 'Protocols'
+           : activeNav === 'create-protocol' ? 'Create Protocol'
+           : activeNav === 'sites'           ? 'Research Sites'
+           : activeNav === 'create-site'     ? 'Register Site'
+           : activeNav === 'reports'         ? 'Reports'
+           : 'Settings' }}
         </h2>
         <span class="breadcrumb">LifeSci360 / {{ role }}</span>
       </div>
@@ -377,6 +389,103 @@
 
     <!-- ══ OTHER SECTIONS ══ -->
     <div class="content placeholder-content" *ngIf="activeNav === 'settings'">
+    <!-- ══ AUDIT LOG ══ -->
+    <div class="content" *ngIf="activeNav === 'audit'">
+
+      <div class="audit-toolbar">
+        <div>
+          <h3 class="section-title">Activity Audit Log</h3>
+          <p class="section-sub">All platform events — logins, enrollments, and failures — in real time.</p>
+        </div>
+        <div class="audit-filter-wrap">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>
+          <input type="text" [(ngModel)]="auditFilter" placeholder="Filter by name, email, or action..."/>
+        </div>
+      </div>
+
+      <div class="loading-row" *ngIf="auditLoading">
+        <div class="spinner-lg"></div>
+        <span>Loading audit log...</span>
+      </div>
+
+      <div class="section-card" *ngIf="!auditLoading">
+        <div class="section-header">
+          <h4>Events</h4>
+          <span class="section-badge">{{ filteredAuditLogs.length }} records</span>
+        </div>
+        <div class="table-wrap table-wrap--scroll">
+          <table>
+            <thead class="thead-sticky">
+              <tr>
+                <th>Timestamp</th>
+                <th>Actor</th>
+                <th>Action</th>
+                <th>Description</th>
+                <th>Target</th>
+                <th>IP Address</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let log of filteredAuditLogs">
+                <td class="muted audit-time">{{ log.createdAt | date:'dd MMM yyyy, HH:mm:ss' }}</td>
+                <td>
+                  <div class="td-user">
+                    <div class="td-avatar">{{ avatarFor(log.actorName) }}</div>
+                    <div class="actor-meta">
+                      <span class="user-name">{{ log.actorName }}</span>
+                      <span class="actor-email">{{ log.actorEmail }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="action-badge" [style.background]="actionColor(log.action)" [style.color]="actionTextColor(log.action)">
+                    {{ log.action }}
+                  </span>
+                </td>
+                <td class="audit-desc">{{ log.description }}</td>
+                <td class="muted">{{ log.targetUserName || '—' }}</td>
+                <td class="muted mono">{{ log.ipAddress || '—' }}</td>
+                <td>
+                  <span class="status-badge" [class.active]="log.isSuccess" [class.offline]="!log.isSuccess">
+                    <span class="status-dot"></span>{{ log.isSuccess ? 'Success' : 'Failed' }}
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="filteredAuditLogs.length === 0 && !auditLoading">
+                <td colspan="7" class="empty-row">No audit events found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PROTOCOLS ══ -->
+    <div class="content" *ngIf="activeNav === 'protocols'">
+      <app-protocols (navigate)="onProtocolNavigate($event)"></app-protocols>
+    </div>
+
+    <!-- ══ CREATE PROTOCOL ══ -->
+    <div class="content" *ngIf="activeNav === 'create-protocol'">
+      <app-create-protocol (navigate)="onProtocolNavigate($event)"></app-create-protocol>
+    </div>
+
+    <!-- ══ SITES ══ -->
+    <div class="content" *ngIf="activeNav === 'sites'">
+      <app-sites (navigate)="onProtocolNavigate($event)"></app-sites>
+    </div>
+
+    <!-- ══ CREATE SITE ══ -->
+    <div class="content" *ngIf="activeNav === 'create-site'">
+      <app-create-site (navigate)="onProtocolNavigate($event)"></app-create-site>
+    </div>
+
+    <!-- ══ OTHER SECTIONS ══ -->
+    <div class="content placeholder-content"
+      *ngIf="activeNav !== 'dashboard' && activeNav !== 'users' && activeNav !== 'audit'
+          && activeNav !== 'protocols' && activeNav !== 'create-protocol'
+          && activeNav !== 'sites'     && activeNav !== 'create-site'">
       <div class="placeholder-card">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
         <h3>{{ activeNav | titlecase }} Module</h3>

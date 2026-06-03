@@ -80,6 +80,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.showProfileMenu = !this.showProfileMenu;
   }
 
+  // Protocol module nav keys (not shown in sidebar, navigated programmatically)
+  readonly protocolSubNavs = ['create-protocol', 'create-site'];
+
+  onProtocolNavigate(key: string): void { this.activeNav = key; }
+
+  constructor(private auth: AuthService, private fb: FormBuilder, private cdr: ChangeDetectorRef) {}
+
   ngOnInit(): void {
     this.email = this.auth.getEmail() ?? '';
     this.role  = this.auth.getRole()  ?? '';

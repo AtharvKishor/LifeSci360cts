@@ -1,6 +1,7 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using ProtocolService.Data.Entities;
 using ProtocolService.Repositories;
+using ProtocolService.Enums;
 using Shared.CL.DTOs;
 
 namespace ProtocolService.Services;
@@ -8,6 +9,12 @@ namespace ProtocolService.Services;
 public class SiteServiceImpl : ISiteService
 {
     private readonly ISiteRepository _repo;
+
+    private static readonly HashSet<string> BlockedValues = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "string", "test", "abc", "xyz", "foo", "bar", "null", "none",
+        "na", "n/a", "sample", "example", "demo", "dummy", "placeholder"
+    };
 
     public SiteServiceImpl(ISiteRepository repo)
     {
@@ -82,7 +89,7 @@ public class SiteServiceImpl : ISiteService
         return MapToResponse(site);
     }
 
-    // ── Private Helpers ────────────────────────────────────────────────────
+    // â”€â”€ Private Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private static void ValidateName(string name)
     {
@@ -94,6 +101,9 @@ public class SiteServiceImpl : ISiteService
 
         if (!Regex.IsMatch(name, @"[a-zA-Z]"))
             throw new ArgumentException("Site name must contain at least one letter.");
+
+        if (BlockedValues.Contains(name))
+            throw new ArgumentException($"'{name}' is not a valid site name. Please provide a real site name.");
     }
 
     private static void ValidateLocation(string location)
@@ -106,11 +116,14 @@ public class SiteServiceImpl : ISiteService
 
         if (!Regex.IsMatch(location, @"[a-zA-Z]"))
             throw new ArgumentException("Location must contain at least one letter.");
+
+        if (BlockedValues.Contains(location))
+            throw new ArgumentException($"'{location}' is not a valid location. Please provide a real location.");
     }
 
     private static SiteResponseDto MapToResponse(Site s)
     {
-        int count = s.ProtocolSites.Count(ps => ps.Status != AssignmentStatus.Closed);
+        int count = s.ProtocolSites.Count(ps => ps.Status == AssignmentStatus.Active);
 
         return new SiteResponseDto
         {
