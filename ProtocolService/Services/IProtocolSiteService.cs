@@ -1,4 +1,5 @@
-﻿using Shared.CL.DTOs;
+﻿using ProtocolService.DTOs;
+using Shared.CL.DTOs;
 
 namespace ProtocolService.Services;
 
@@ -9,4 +10,5 @@ public interface IProtocolSiteService
     Task<List<ProtocolSiteResponseDto>> GetBySiteAsync(Guid siteId);
     Task<ProtocolSiteResponseDto> UpdateStatusAsync(Guid protocolId, Guid assignmentId, UpdateProtocolSiteStatusDto dto);
     Task<ProtocolSiteResponseDto> RemoveAsync(Guid protocolId, Guid assignmentId);
+    Task<List<InvestigatorDto>> GetInvestigatorsAsync();
 }

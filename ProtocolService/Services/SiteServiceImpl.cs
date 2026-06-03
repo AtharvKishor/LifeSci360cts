@@ -1,154 +1,129 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ProtocolService.Data;
+﻿using System.Text.RegularExpressions;
 using ProtocolService.Data.Entities;
+using ProtocolService.Repositories;
+using ProtocolService.Enums;
 using Shared.CL.DTOs;
 
 namespace ProtocolService.Services;
 
 public class SiteServiceImpl : ISiteService
 {
-    private readonly ProtocolDbContext db;
+    private readonly ISiteRepository _repo;
 
-    public SiteServiceImpl(ProtocolDbContext db)
+    private static readonly HashSet<string> BlockedValues = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
-        this.db = db;
+        "string", "test", "abc", "xyz", "foo", "bar", "null", "none",
+        "na", "n/a", "sample", "example", "demo", "dummy", "placeholder"
+    };
+
+    public SiteServiceImpl(ISiteRepository repo)
+    {
+        _repo = repo;
     }
 
     public async Task<SiteResponseDto> CreateAsync(CreateSiteDto dto)
     {
-        var name = dto.Name.Trim();
-        var location = dto.Location?.Trim();
+        var name = dto.Name?.Trim() ?? string.Empty;
+        var location = dto.Location?.Trim() ?? string.Empty;
 
-        var exists = await db.Sites
-            .AnyAsync(s => s.IsActive
-                        && s.Name == name
-                        && (s.Location ?? "") == (location ?? ""));
+        ValidateName(name);
+        ValidateLocation(location);
 
-        if (exists)
-        {
+        if (await _repo.NameLocationExistsAsync(name, location))
             throw new InvalidOperationException(
                 "A site with the same name and location already exists.");
-        }
 
-        var site = new Site
-        {
-            Name = name,
-            Location = location,
-            IsActive = true
-        };
+        var site = new Site { Name = name, Location = location, IsActive = true };
 
-        db.Sites.Add(site);
-        await db.SaveChangesAsync();
+        await _repo.AddAsync(site);
+        await _repo.SaveChangesAsync();
         return MapToResponse(site);
     }
 
     public async Task<SiteResponseDto?> GetByIdAsync(Guid id)
     {
-        var site = await db.Sites
-            .Include(s => s.ProtocolSites)
-            .FirstOrDefaultAsync(s => s.SiteId == id && s.IsActive);
-
-        if (site == null)
-        {
-            return null;
-        }
-        return MapToResponse(site);
+        var site = await _repo.GetByIdAsync(id);
+        return site == null ? null : MapToResponse(site);
     }
 
     public async Task<List<SiteResponseDto>> GetAllAsync(string? name, string? location)
     {
-        var query = db.Sites
-            .Include(s => s.ProtocolSites)
-            .Where(s => s.IsActive);
-
-        if (!string.IsNullOrWhiteSpace(name))
-        {
-            query = query.Where(s => EF.Functions.Like(s.Name, "%" + name + "%"));
-        }
-
-        if (!string.IsNullOrWhiteSpace(location))
-        {
-            query = query.Where(s => EF.Functions.Like(s.Location!, "%" + location + "%"));
-        }
-
-        var sites = await query.OrderBy(s => s.Name).ToListAsync();
-
-        var result = new List<SiteResponseDto>();
-        foreach (var s in sites)
-        {
-            result.Add(MapToResponse(s));
-        }
-        return result;
+        var sites = await _repo.GetAllAsync(name, location);
+        return sites.Select(MapToResponse).ToList();
     }
 
     public async Task<SiteResponseDto> UpdateAsync(Guid id, UpdateSiteDto dto)
     {
-        var site = await db.Sites
-            .Include(s => s.ProtocolSites)
-            .FirstOrDefaultAsync(s => s.SiteId == id && s.IsActive);
+        var site = await _repo.GetByIdAsync(id)
+            ?? throw new KeyNotFoundException("Site not found.");
 
-        if (site == null)
-        {
-            throw new KeyNotFoundException("Site not found.");
-        }
+        var name = dto.Name?.Trim() ?? string.Empty;
+        var location = dto.Location?.Trim() ?? string.Empty;
 
-        var name = dto.Name.Trim();
-        var location = dto.Location?.Trim();
+        ValidateName(name);
+        ValidateLocation(location);
 
-        var duplicate = await db.Sites
-            .AnyAsync(s => s.IsActive
-                        && s.Name == name
-                        && (s.Location ?? "") == (location ?? "")
-                        && s.SiteId != id);
-
-        if (duplicate)
-        {
+        if (await _repo.NameLocationExistsAsync(name, location, id))
             throw new InvalidOperationException(
                 "A site with the same name and location already exists.");
-        }
 
         site.Name = name;
         site.Location = location;
-        await db.SaveChangesAsync();
 
+        await _repo.SaveChangesAsync();
         return MapToResponse(site);
     }
 
     public async Task<SiteResponseDto> SoftDeleteAsync(Guid id)
     {
-        var site = await db.Sites
-            .Include(s => s.ProtocolSites)
-            .FirstOrDefaultAsync(s => s.SiteId == id && s.IsActive);
-
-        if (site == null)
-        {
-            throw new KeyNotFoundException("Site not found.");
-        }
+        var site = await _repo.GetByIdAsync(id)
+            ?? throw new KeyNotFoundException("Site not found.");
 
         site.IsActive = false;
 
         foreach (var ps in site.ProtocolSites)
-        {
             if (ps.Status != AssignmentStatus.Closed)
-            {
                 ps.Status = AssignmentStatus.Closed;
-            }
-        }
 
-        await db.SaveChangesAsync();
+        await _repo.SaveChangesAsync();
         return MapToResponse(site);
+    }
+
+    // â”€â”€ Private Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+    private static void ValidateName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Site name is required and cannot be blank or whitespace.");
+
+        if (name.Length < 3)
+            throw new ArgumentException("Site name must be at least 3 characters.");
+
+        if (!Regex.IsMatch(name, @"[a-zA-Z]"))
+            throw new ArgumentException("Site name must contain at least one letter.");
+
+        if (BlockedValues.Contains(name))
+            throw new ArgumentException($"'{name}' is not a valid site name. Please provide a real site name.");
+    }
+
+    private static void ValidateLocation(string location)
+    {
+        if (string.IsNullOrWhiteSpace(location))
+            throw new ArgumentException("Location is required and cannot be blank or whitespace.");
+
+        if (location.Length < 3)
+            throw new ArgumentException("Location must be at least 3 characters.");
+
+        if (!Regex.IsMatch(location, @"[a-zA-Z]"))
+            throw new ArgumentException("Location must contain at least one letter.");
+
+        if (BlockedValues.Contains(location))
+            throw new ArgumentException($"'{location}' is not a valid location. Please provide a real location.");
     }
 
     private static SiteResponseDto MapToResponse(Site s)
     {
-        int count = 0;
-        foreach (var ps in s.ProtocolSites)
-        {
-            if (ps.Status != AssignmentStatus.Closed)
-            {
-                count++;
-            }
-        }
+        int count = s.ProtocolSites.Count(ps => ps.Status == AssignmentStatus.Active);
 
         return new SiteResponseDto
         {

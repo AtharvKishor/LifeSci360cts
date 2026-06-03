@@ -1,10 +1,30 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Shared.CL;
 using Shared.CL.DTOs;
+using ProtocolService.DTOs;
 using ProtocolService.Services;
 
 namespace ProtocolService.Controllers;
 
+// ── Investigators lookup (standalone route) ──────────────────────────────────
+[ApiController]
+[Route("api/investigators")]
+public class InvestigatorsController : ControllerBase
+{
+    private readonly IProtocolSiteService svc;
+
+    public InvestigatorsController(IProtocolSiteService svc) => this.svc = svc;
+
+    [HttpGet]
+    public async Task<ActionResult<ApiResponse<List<InvestigatorDto>>>> GetAll()
+    {
+        var list = await svc.GetInvestigatorsAsync();
+        return Ok(ApiResponse<List<InvestigatorDto>>.Ok(list));
+    }
+}
+
+// ── Protocol-Site assignments ────────────────────────────────────────────────
 [ApiController]
 [Route("api/protocols/{protocolId:guid}/sites")]
 public class ProtocolSitesController : ControllerBase
@@ -22,8 +42,8 @@ public class ProtocolSitesController : ControllerBase
     {
         try
         {
-            await svc.AssignAsync(protocolId, dto);
-            return Ok(ApiResponse<ProtocolSiteResponseDto>.OkOnly("Site assigned successfully."));
+            var assigned = await svc.AssignAsync(protocolId, dto);
+            return StatusCode(201, ApiResponse<ProtocolSiteResponseDto>.Ok(assigned, "Site assigned successfully."));
         }
         catch (KeyNotFoundException ex)
         {
@@ -36,8 +56,7 @@ public class ProtocolSitesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<List<ProtocolSiteResponseDto>>>> GetByProtocol(
-        Guid protocolId)
+    public async Task<ActionResult<ApiResponse<List<ProtocolSiteResponseDto>>>> GetByProtocol(Guid protocolId)
     {
         var list = await svc.GetByProtocolAsync(protocolId);
         return Ok(ApiResponse<List<ProtocolSiteResponseDto>>.Ok(list));

@@ -27,6 +27,7 @@
         <svg *ngIf="item.icon==='doc'"      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12h6M9 16h6M13 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V8l-7-5z"/></svg>
         <svg *ngIf="item.icon==='chart'"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18M7 16l4-4 4 4 4-4"/></svg>
         <svg *ngIf="item.icon==='audit'"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12h6M9 16h6M17 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2z"/><path d="M9 8h6"/></svg>
+        <svg *ngIf="item.icon==='location'"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         <svg *ngIf="item.icon==='settings'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
         <span class="nav-label" *ngIf="!sidebarCollapsed">{{ item.label }}</span>
       </button>
@@ -55,10 +56,17 @@
     <header class="topbar">
       <div class="topbar-left">
         <h2 class="page-title">
-          {{ activeNav === 'dashboard' ? 'Dashboard' : activeNav === 'users' ? 'User Management' :
-             activeNav === 'audit' ? 'Audit Log' :
-             activeNav === 'trials' ? 'Clinical Trials' : activeNav === 'samples' ? 'Lab & Samples' :
-             activeNav === 'protocols' ? 'Protocols' : activeNav === 'reports' ? 'Reports' : 'Settings' }}
+          {{ activeNav === 'dashboard'        ? 'Dashboard'
+           : activeNav === 'users'           ? 'User Management'
+           : activeNav === 'audit'           ? 'Audit Log'
+           : activeNav === 'trials'          ? 'Clinical Trials'
+           : activeNav === 'samples'         ? 'Lab & Samples'
+           : activeNav === 'protocols'       ? 'Protocols'
+           : activeNav === 'create-protocol' ? 'Create Protocol'
+           : activeNav === 'sites'           ? 'Research Sites'
+           : activeNav === 'create-site'     ? 'Register Site'
+           : activeNav === 'reports'         ? 'Reports'
+           : 'Settings' }}
         </h2>
         <span class="breadcrumb">LifeSci360 / {{ role }}</span>
       </div>
@@ -348,8 +356,31 @@
       </div>
     </div>
 
+    <!-- ══ PROTOCOLS ══ -->
+    <div class="content" *ngIf="activeNav === 'protocols'">
+      <app-protocols (navigate)="onProtocolNavigate($event)"></app-protocols>
+    </div>
+
+    <!-- ══ CREATE PROTOCOL ══ -->
+    <div class="content" *ngIf="activeNav === 'create-protocol'">
+      <app-create-protocol (navigate)="onProtocolNavigate($event)"></app-create-protocol>
+    </div>
+
+    <!-- ══ SITES ══ -->
+    <div class="content" *ngIf="activeNav === 'sites'">
+      <app-sites (navigate)="onProtocolNavigate($event)"></app-sites>
+    </div>
+
+    <!-- ══ CREATE SITE ══ -->
+    <div class="content" *ngIf="activeNav === 'create-site'">
+      <app-create-site (navigate)="onProtocolNavigate($event)"></app-create-site>
+    </div>
+
     <!-- ══ OTHER SECTIONS ══ -->
-    <div class="content placeholder-content" *ngIf="activeNav !== 'dashboard' && activeNav !== 'users' && activeNav !== 'audit'">
+    <div class="content placeholder-content"
+      *ngIf="activeNav !== 'dashboard' && activeNav !== 'users' && activeNav !== 'audit'
+          && activeNav !== 'protocols' && activeNav !== 'create-protocol'
+          && activeNav !== 'sites'     && activeNav !== 'create-site'">
       <div class="placeholder-card">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
         <h3>{{ activeNav | titlecase }} Module</h3>

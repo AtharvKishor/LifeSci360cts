@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Shared.CL;
 using Shared.CL.DTOs;
 using ProtocolService.Services;
@@ -19,13 +20,16 @@ public class SitesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<ApiResponse<SiteResponseDto>>> Create(
-        [FromBody] CreateSiteDto dto)
+    public async Task<ActionResult<ApiResponse<SiteResponseDto>>> Create([FromBody] CreateSiteDto dto)
     {
         try
         {
-            await svc.CreateAsync(dto);
-            return Ok(ApiResponse<SiteResponseDto>.OkOnly("Site registered successfully."));
+            var created = await svc.CreateAsync(dto);
+            return StatusCode(201, ApiResponse<SiteResponseDto>.Ok(created, "Site registered successfully."));
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ApiResponse<SiteResponseDto>.Fail(ex.Message));
         }
         catch (InvalidOperationException ex)
         {
@@ -47,28 +51,29 @@ public class SitesController : ControllerBase
     {
         var result = await svc.GetByIdAsync(id);
         if (result == null)
-        {
             return NotFound(ApiResponse<SiteResponseDto>.Fail("Site not found."));
-        }
+
         return Ok(ApiResponse<SiteResponseDto>.Ok(result));
     }
 
     [HttpGet("{siteId:guid}/protocols")]
-    public async Task<ActionResult<ApiResponse<List<ProtocolSiteResponseDto>>>> GetProtocols(
-        Guid siteId)
+    public async Task<ActionResult<ApiResponse<List<ProtocolSiteResponseDto>>>> GetProtocols(Guid siteId)
     {
         var list = await protocolSiteSvc.GetBySiteAsync(siteId);
         return Ok(ApiResponse<List<ProtocolSiteResponseDto>>.Ok(list));
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult<ApiResponse<SiteResponseDto>>> Update(
-        Guid id, [FromBody] UpdateSiteDto dto)
+    public async Task<ActionResult<ApiResponse<SiteResponseDto>>> Update(Guid id, [FromBody] UpdateSiteDto dto)
     {
         try
         {
             await svc.UpdateAsync(id, dto);
             return Ok(ApiResponse<SiteResponseDto>.OkOnly("Site updated successfully."));
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ApiResponse<SiteResponseDto>.Fail(ex.Message));
         }
         catch (KeyNotFoundException ex)
         {

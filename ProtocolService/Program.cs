@@ -1,12 +1,12 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NSwag.AspNetCore;
 using Shared.CL;
 using ProtocolService.Data;
+using ProtocolService.Repositories;
 using ProtocolService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,6 +37,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+
+// Repositories
+builder.Services.AddScoped<IProtocolRepository, ProtocolRepository>();
+builder.Services.AddScoped<ISiteRepository, SiteRepository>();
+builder.Services.AddScoped<IProtocolSiteRepository, ProtocolSiteRepository>();
 
 // Services
 builder.Services.AddScoped<IProtocolService, ProtocolServiceImpl>();
@@ -75,26 +80,6 @@ builder.Services.AddCors(opts =>
          .AllowAnyHeader()));
 
 var app = builder.Build();
-
-// Global exception handler
-app.UseExceptionHandler(errApp =>
-{
-    errApp.Run(async ctx =>
-    {
-        var feature = ctx.Features.Get<IExceptionHandlerFeature>();
-        var error = feature?.Error;
-
-        ctx.Response.StatusCode = 500;
-        ctx.Response.ContentType = "application/json";
-
-        var response = ApiResponse<object>.Fail(
-            app.Environment.IsDevelopment()
-                ? error?.Message ?? "An unexpected error occurred."
-                : "An unexpected error occurred. Please try again later.");
-
-        await ctx.Response.WriteAsJsonAsync(response);
-    });
-});
 
 if (app.Environment.IsDevelopment())
 {

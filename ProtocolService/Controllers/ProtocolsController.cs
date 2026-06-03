@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Shared.CL;
 using Shared.CL.DTOs;
 using ProtocolService.Services;
@@ -11,6 +12,8 @@ public class ProtocolsController : ControllerBase
 {
     private readonly IProtocolService svc;
 
+    // TODO: Replace with JWT claims once [Authorize] is wired up
+    // User.FindFirst(ClaimTypes.NameIdentifier) → Guid
     private static readonly Guid TestUserId =
         Guid.Parse("20000000-0000-0000-0000-000000000001");
 
@@ -20,13 +23,16 @@ public class ProtocolsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<ApiResponse<ProtocolResponseDto>>> Create(
-        [FromBody] CreateProtocolDto dto)
+    public async Task<ActionResult<ApiResponse<ProtocolResponseDto>>> Create([FromBody] CreateProtocolDto dto)
     {
         try
         {
-            await svc.CreateAsync(dto, TestUserId);
-            return Ok(ApiResponse<ProtocolResponseDto>.OkOnly("Protocol created successfully."));
+            var created = await svc.CreateAsync(dto, TestUserId);
+            return StatusCode(201, ApiResponse<ProtocolResponseDto>.Ok(created, "Protocol created successfully."));
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ApiResponse<ProtocolResponseDto>.Fail(ex.Message));
         }
         catch (InvalidOperationException ex)
         {
@@ -49,9 +55,8 @@ public class ProtocolsController : ControllerBase
     {
         var result = await svc.GetByIdAsync(id);
         if (result == null)
-        {
             return NotFound(ApiResponse<ProtocolResponseDto>.Fail("Protocol not found."));
-        }
+
         return Ok(ApiResponse<ProtocolResponseDto>.Ok(result));
     }
 
@@ -63,6 +68,10 @@ public class ProtocolsController : ControllerBase
         {
             await svc.UpdateAsync(id, dto);
             return Ok(ApiResponse<ProtocolResponseDto>.OkOnly("Protocol updated successfully."));
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ApiResponse<ProtocolResponseDto>.Fail(ex.Message));
         }
         catch (KeyNotFoundException ex)
         {

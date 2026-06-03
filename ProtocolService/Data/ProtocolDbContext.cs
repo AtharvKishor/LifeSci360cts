@@ -11,6 +11,7 @@ public class ProtocolDbContext : DbContext
     public DbSet<Site> Sites => Set<Site>();
     public DbSet<ProtocolSite> ProtocolSites => Set<ProtocolSite>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<Role> Roles => Set<Role>();
 
     protected override void OnModelCreating(ModelBuilder mb)
     {
@@ -21,7 +22,8 @@ public class ProtocolDbContext : DbContext
         mb.Ignore<Notification>();
         mb.Ignore<Patient>();
         mb.Ignore<PatientEnrollment>();
-        mb.Ignore<Role>();
+        // Role is read-only — excluded from migrations
+        mb.Entity<Role>(e => e.ToTable("Roles", t => t.ExcludeFromMigrations()));
         mb.Ignore<Sample>();
         mb.Ignore<UserSession>();
         mb.Ignore<Visit>();
@@ -67,7 +69,7 @@ public class ProtocolDbContext : DbContext
             e.Ignore(x => x.KpiReports);
             e.Ignore(x => x.LabResults);
             e.Ignore(x => x.Notifications);
-            e.Ignore(x => x.Role);
+            // Role navigation now available (read-only)
             e.Ignore(x => x.Samples);
             e.Ignore(x => x.UserSessions);
         });

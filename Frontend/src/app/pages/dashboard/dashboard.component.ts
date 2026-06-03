@@ -58,9 +58,15 @@ export class DashboardComponent implements OnInit {
     { key: 'trials',    label: 'Clinical Trials', icon: 'flask'    },
     { key: 'samples',   label: 'Lab & Samples',   icon: 'beaker'   },
     { key: 'protocols', label: 'Protocols',       icon: 'doc'      },
+    { key: 'sites',     label: 'Sites',           icon: 'location' },
     { key: 'reports',   label: 'Reports',         icon: 'chart'    },
     { key: 'settings',  label: 'Settings',        icon: 'settings' },
   ];
+
+  // Protocol module nav keys (not shown in sidebar, navigated programmatically)
+  readonly protocolSubNavs = ['create-protocol', 'create-site'];
+
+  onProtocolNavigate(key: string): void { this.activeNav = key; }
 
   constructor(private auth: AuthService, private fb: FormBuilder, private cdr: ChangeDetectorRef) {}
 
