@@ -301,69 +301,8 @@
     <!-- ══ NOTIFICATIONS MODULE ══ -->
     <app-notifications *ngIf="activeNav === 'notifications'" [role]="role" [currentUserId]="currentUserId"></app-notifications>
 
-    <!-- ══ TRIALS MODULE ══ -->
-    <app-trials *ngIf="activeNav === 'trials'" [role]="role"></app-trials>
-
     <!-- ══ PROTOCOLS MODULE ══ -->
     <app-protocols *ngIf="activeNav === 'protocols'" [role]="role"></app-protocols>
-
-      <div class="loading-row" *ngIf="auditLoading">
-        <div class="spinner-lg"></div>
-        <span>Loading audit log...</span>
-      </div>
-
-      <div class="section-card" *ngIf="!auditLoading">
-        <div class="section-header">
-          <h4>Events</h4>
-          <span class="section-badge">{{ filteredAuditLogs.length }} records</span>
-        </div>
-        <div class="table-wrap table-wrap--scroll">
-          <table>
-            <thead class="thead-sticky">
-              <tr>
-                <th>Timestamp</th>
-                <th>Actor</th>
-                <th>Action</th>
-                <th>Description</th>
-                <th>Target</th>
-                <th>IP Address</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let log of filteredAuditLogs">
-                <td class="muted audit-time">{{ log.createdAt | date:'dd MMM yyyy, HH:mm:ss' }}</td>
-                <td>
-                  <div class="td-user">
-                    <div class="td-avatar">{{ avatarFor(log.actorName) }}</div>
-                    <div class="actor-meta">
-                      <span class="user-name">{{ log.actorName }}</span>
-                      <span class="actor-email">{{ log.actorEmail }}</span>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <span class="action-badge" [style.background]="actionColor(log.action)" [style.color]="actionTextColor(log.action)">
-                    {{ log.action }}
-                  </span>
-                </td>
-                <td class="audit-desc">{{ log.description }}</td>
-                <td class="muted">{{ log.targetUserName || '—' }}</td>
-                <td class="muted mono">{{ log.ipAddress || '—' }}</td>
-                <td>
-                  <span class="status-badge" [class.active]="log.isSuccess" [class.offline]="!log.isSuccess">
-                    <span class="status-dot"></span>{{ log.isSuccess ? 'Success' : 'Failed' }}
-                  </span>
-                </td>
-              </tr>
-              <tr *ngIf="filteredAuditLogs.length === 0 && !auditLoading">
-                <td colspan="7" class="empty-row">No audit events found.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
 
     <!-- ══ CLINICAL TRIALS ══ -->
     <div class="content" *ngIf="activeNav === 'trials'" style="overflow-y:auto">
@@ -437,7 +376,7 @@
     </div>
 
     <!-- ══ OTHER SECTIONS ══ -->
-    <div class="content placeholder-content" *ngIf="activeNav !== 'dashboard' && activeNav !== 'users' && activeNav !== 'audit' && activeNav !== 'trials'">
+    <div class="content placeholder-content" *ngIf="activeNav === 'settings'">
       <div class="placeholder-card">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
         <h3>{{ activeNav | titlecase }} Module</h3>

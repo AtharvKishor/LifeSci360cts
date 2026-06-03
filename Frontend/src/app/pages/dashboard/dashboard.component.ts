@@ -1,14 +1,11 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, HostListener, ViewChild } from '@angular/core';
-import { timeout } from 'rxjs';
-import { AuthService, EnrolledUser, ActiveSession } from '../../services/auth.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { timeout, Subscription } from 'rxjs';
+import { AuthService, EnrolledUser, ActiveSession, AuditLogEntry } from '../../services/auth.service';
 import { SampleService, SampleListDto } from '../../services/sample.service';
 import { NotificationService } from '../../services/notification.service';
 import { UsersComponent } from '../../modules/users/users.component';
 import { SamplesComponent } from '../../modules/samples/samples/samples.component';
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { finalize, timeout, Subscription } from 'rxjs';
-import { AuthService, EnrolledUser, RoleOption, ActiveSession, AuditLogEntry, UpdateUserRequest } from '../../services/auth.service';
 import { TrialsNavService } from '../../services/trials-nav.service';
 
 @Component({
@@ -36,6 +33,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   sessionsLoading = true;
   sessions: ActiveSession[] = [];
 
+  enrollForm!: FormGroup;
+  editForm!: FormGroup;
+  filteredAuditLogs: AuditLogEntry[] = [];
+  auditLoading = false;
+
   stats = [
     { label: 'Active Users',       value: '—', delta: '', up: true,  icon: 'users',    color: '#e8f5e9', accent: '#2e7d32' },
     { label: 'Total Enrolled',     value: '—', delta: '', up: true,  icon: 'enrolled', color: '#e3f2fd', accent: '#1565c0' },
@@ -43,7 +45,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     { label: 'Audit Events Today', value: '—', delta: '', up: true,  icon: 'shield',   color: '#f3e5f5', accent: '#6a1b9a' },
   ];
 
-  // Non-admin dashboard sample stats
   samples: SampleListDto[] = [];
   samplesLoading = false;
   samplesError = '';
@@ -87,14 +88,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadUnreadCount();
     this.unreadTimer = setInterval(() => this.loadUnreadCount(), 15000);
 
-    if (this.isAdmin) {
-      this.loadDashboardData();
-    } else {
-      this.statsLoading    = false;
-      this.sessionsLoading = false;
-      this.loadSamples();
-    }
-    
     this.enrollForm = this.fb.group({
       name:     ['', [Validators.required, Validators.minLength(2)]],
       email:    ['', [Validators.required, Validators.email]],
@@ -108,23 +101,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
       roleName: ['', Validators.required],
       isActive: [true]
     });
-    if (this.isAdmin) this.loadDashboardData();
+
+    if (this.isAdmin) {
+      this.loadDashboardData();
+    } else {
+      this.statsLoading    = false;
+      this.sessionsLoading = false;
+      this.loadSamples();
+    }
+
     if (this.isClinicalTrialManager && !this.isAdmin) this.activeNav = 'trials';
-    
-    // Restore tab after returning from a separate page (e.g. visit-detail)
+
     const pending = this.trialsNav.consumePending();
     if (pending) {
       this.activeNav = 'trials';
       this.trialsView = pending;
     }
-    
+
     this.navSub = this.trialsNav.nav$.subscribe(view => {
       if (!view) return;
       this.activeNav = 'trials';
       this.trialsView = view;
       this.cdr.detectChanges();
     });
-  }
   }
 
   ngOnDestroy() {
@@ -260,6 +259,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
       'TESTED':    '#15803d', 'ANALYZED':  '#0369a1', 'REJECTED': '#b91c1c'
     };
     return map[status] ?? '#555';
+  }
+
+  actionColor(action: string): string {
+    const map: Record<string, string> = {
+      'CREATE': '#dcfce7', 'UPDATE': '#dbeafe', 'DELETE': '#fee2e2',
+      'LOGIN':  '#e0f2fe', 'LOGOUT': '#f3e5f5', 'VIEW':   '#fef3c7'
+    };
+    return map[(action || '').toUpperCase()] ?? '#f5f5f5';
+  }
+
+  actionTextColor(action: string): string {
+    const map: Record<string, string> = {
+      'CREATE': '#15803d', 'UPDATE': '#1d4ed8', 'DELETE': '#b91c1c',
+      'LOGIN':  '#0369a1', 'LOGOUT': '#6a1b9a', 'VIEW':   '#92400e'
+    };
+    return map[(action || '').toUpperCase()] ?? '#555';
   }
 
   logout(): void {

@@ -3,7 +3,8 @@
     "allow": [
       "Read(//c/Users/2487479/.nuget/packages/swashbuckle.aspnetcore.swaggergen/10.1.7/**)",
       "Read(//c/Users/2487479/.nuget/packages/swashbuckle.aspnetcore.swagger/10.1.7/**)",
-      "Bash(npx ng *)"
+      "Bash(npx ng *)",
+      "Bash(npx tsc *)"
     ]
   }
 }
