@@ -1,14 +1,18 @@
-﻿namespace AuditLogService.API.Models
+namespace AuditLogService.API.Models;
+
+public class AuditLog
 {
-    public class AuditLog
-    {
-        public int Id { get; set; }
-        public int? UserId { get; set; }
-        public string? UserEmail { get; set; }
-        public string Action { get; set; } = null!;
-        public string ServiceName { get; set; } = null!;
-        public bool IsError { get; set; } = false;  // explicit default
-        public string? ErrorMessage { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    }
+    public int      Id           { get; set; }
+    public Guid?    ActorUserId  { get; set; }
+    public string   ActorName    { get; set; } = string.Empty;
+    public string?  ActorEmail   { get; set; }
+    public string   Action       { get; set; } = string.Empty;
+    public string   ServiceName  { get; set; } = string.Empty;
+    public string?  Description  { get; set; }
+    public string?  EntityId     { get; set; }
+    public string?  EntityName   { get; set; }
+    public string?  IpAddress    { get; set; }
+    public bool     IsSuccess    { get; set; } = true;
+    public string?  ErrorMessage { get; set; }
+    public DateTime CreatedAt    { get; set; } = DateTime.UtcNow;
 }

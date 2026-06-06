@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef, Input } from '@angular/core';
-import { timeout } from 'rxjs';
+import { retry, timeout } from 'rxjs';
 import { AuthService, AuditLogEntry } from '../../services/auth.service';
 
 @Component({
@@ -13,18 +13,28 @@ export class AuditComponent implements OnInit {
 
   auditLogs: AuditLogEntry[] = [];
   auditLoading = false;
+  auditFailed = false;
   auditFilter = '';
+  serviceFilter = '';
 
   get isAdmin(): boolean { return this.role === 'ADMIN' || this.role === 'SYSTEM_ADMIN'; }
 
+  get services(): string[] {
+    return [...new Set(this.auditLogs.map(l => l.serviceName))].sort();
+  }
+
   get filteredAuditLogs(): AuditLogEntry[] {
-    if (!this.auditFilter.trim()) return this.auditLogs;
+    let logs = this.auditLogs;
+    if (this.serviceFilter) logs = logs.filter(l => l.serviceName === this.serviceFilter);
+    if (!this.auditFilter.trim()) return logs;
     const q = this.auditFilter.toLowerCase();
-    return this.auditLogs.filter(l =>
-      l.actorName.toLowerCase().includes(q) ||
-      l.actorEmail.toLowerCase().includes(q) ||
+    return logs.filter(l =>
+      (l.actorName ?? '').toLowerCase().includes(q) ||
+      (l.actorEmail ?? '').toLowerCase().includes(q) ||
       l.action.toLowerCase().includes(q) ||
-      l.description.toLowerCase().includes(q)
+      (l.description ?? '').toLowerCase().includes(q) ||
+      (l.entityName ?? '').toLowerCase().includes(q) ||
+      l.serviceName.toLowerCase().includes(q)
     );
   }
 
@@ -33,28 +43,52 @@ export class AuditComponent implements OnInit {
   ngOnInit(): void { this.loadAuditLogs(); }
 
   loadAuditLogs(): void {
-    this.auditLoading = this.auditLogs.length === 0;
-    this.auth.getAuditLogs().pipe(timeout(5000)).subscribe({
-      next: l => { this.auditLogs = l; this.auditLoading = false; this.cdr.detectChanges(); },
-      error: () => { this.auditLoading = false; this.cdr.detectChanges(); }
-    });
+    this.auditLoading = true;
+    this.auditFailed = false;
+    this.auth.getAuditLogs()
+      .pipe(
+        timeout(10000),
+        retry({ count: 3, delay: 4000 })
+      )
+      .subscribe({
+        next: l  => { this.auditLogs = l; this.auditLoading = false; this.cdr.detectChanges(); },
+        error: () => { this.auditLoading = false; this.auditFailed = true; this.cdr.detectChanges(); }
+      });
   }
 
   avatarFor(name: string): string { return name ? name.substring(0, 2).toUpperCase() : '??'; }
 
+  serviceColor(service: string): string {
+    const map: Record<string, string> = {
+      AuthService:     '#e3f2fd',
+      PatientService:  '#e8f5e9',
+      ProtocolService: '#fff3e0',
+      SampleService:   '#f3e5f5'
+    };
+    return map[service] ?? '#f5f5f5';
+  }
+
+  serviceTextColor(service: string): string {
+    const map: Record<string, string> = {
+      AuthService:     '#1565c0',
+      PatientService:  '#2e7d32',
+      ProtocolService: '#e65100',
+      SampleService:   '#6a1b9a'
+    };
+    return map[service] ?? '#555';
+  }
+
   actionColor(action: string): string {
-    if (action === 'LOGIN')         return '#e8f5e9';
-    if (action === 'LOGOUT')        return '#fff3e0';
-    if (action === 'USER_ENROLLED') return '#e3f2fd';
-    if (action === 'LOGIN_FAILED')  return '#fee2e2';
+    if (['LOGIN', 'PATIENT_ENROLLED', 'PROTOCOL_CREATED', 'SITE_CREATED', 'SAMPLE_CREATED', 'LAB_RESULT_CREATED', 'USER_ENROLLED', 'SITE_ASSIGNED_TO_PROTOCOL'].includes(action)) return '#e8f5e9';
+    if (['LOGOUT', 'PATIENT_WITHDRAWN', 'VISIT_CANCELLED', 'PATIENT_DEACTIVATED', 'SITE_DELETED', 'PROTOCOL_DELETED', 'SAMPLE_DELETED', 'LAB_RESULT_DELETED', 'PROTOCOL_SITE_CLOSED'].includes(action)) return '#fff3e0';
+    if (['LOGIN_FAILED'].includes(action)) return '#fee2e2';
     return '#f5f5f5';
   }
 
   actionTextColor(action: string): string {
-    if (action === 'LOGIN')         return '#2e7d32';
-    if (action === 'LOGOUT')        return '#e65100';
-    if (action === 'USER_ENROLLED') return '#1565c0';
-    if (action === 'LOGIN_FAILED')  return '#c62828';
+    if (['LOGIN', 'PATIENT_ENROLLED', 'PROTOCOL_CREATED', 'SITE_CREATED', 'SAMPLE_CREATED', 'LAB_RESULT_CREATED', 'USER_ENROLLED', 'SITE_ASSIGNED_TO_PROTOCOL'].includes(action)) return '#2e7d32';
+    if (['LOGOUT', 'PATIENT_WITHDRAWN', 'VISIT_CANCELLED', 'PATIENT_DEACTIVATED', 'SITE_DELETED', 'PROTOCOL_DELETED', 'SAMPLE_DELETED', 'LAB_RESULT_DELETED', 'PROTOCOL_SITE_CLOSED'].includes(action)) return '#e65100';
+    if (['LOGIN_FAILED'].includes(action)) return '#c62828';
     return '#555';
   }
 }

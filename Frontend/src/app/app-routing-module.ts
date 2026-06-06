@@ -2,16 +2,16 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent }    from './pages/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { AuthGuard }          from './guards/auth.guard';
+import { AuthGuard }          from './core/guards/auth.guard';
 
-import { PatientsList }   from './pages/modules/patientmodule/patients-list/patients-list';
-import { AddPatient }     from './pages/modules/patientmodule/add-patient/add-patient';
-import { EnrollPatient }  from './pages/modules/patientmodule/enroll-patient/enroll-patient';
-import { PatientDetail }  from './pages/modules/patientmodule/patient-detail/patient-detail';
-import { ProtocolVisits } from './pages/modules/patientmodule/protocol-visits/protocol-visits';
-import { Visits }         from './pages/modules/patientmodule/visits/visits';
-import { VisitDetail }    from './pages/modules/patientmodule/visit-detail/visit-detail';
-import { MarkVisits }     from './pages/modules/patientmodule/mark-visits/mark-visits';
+import { PatientsList }   from './modules/patients/patients-list/patients-list';
+import { AddPatient }     from './modules/patients/add-patient/add-patient';
+import { EnrollPatient }  from './modules/patients/enroll-patient/enroll-patient';
+import { PatientDetail }  from './modules/patients/patient-detail/patient-detail';
+import { ProtocolVisits } from './modules/patients/protocol-visits/protocol-visits';
+import { Visits }         from './modules/patients/visits/visits';
+import { VisitDetail }    from './modules/patients/visit-detail/visit-detail';
+import { MarkVisits }     from './modules/patients/mark-visits/mark-visits';
 
 const routes: Routes = [
   { path: 'login',                          component: LoginComponent },

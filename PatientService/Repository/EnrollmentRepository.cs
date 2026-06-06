@@ -73,7 +73,7 @@ public class EnrollmentRepository : IEnrollmentRepository
 
     public async Task<IEnumerable<Protocol>> GetActiveProtocolsAsync()
         => await _ctx.Protocols
-               .Where(p => p.Status == "ACTIVE")
+               .Where(p => p.Status == "ONGOING" || p.Status == "UPCOMING")
                .ToListAsync();
 
     public async Task<IEnumerable<ProtocolSite>> GetActiveSitesByProtocolAsync(Guid protocolId)

@@ -1,10 +1,10 @@
 :host {
-  --accent:     #C4622A;
-  --text-dark:  #1A1A1A;
+  --accent: #C4622A;
+  --text-dark: #1A1A1A;
   --text-muted: #888;
-  --input-bg:   #242424;
+  --input-bg: #deded2;
   --input-text: #ffffff;
-  --font:       'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -268,7 +268,7 @@
 .btn-signin {
   width: 100%;
   padding: 0.85rem;
-  background: var(--input-bg);
+  background: #333;
   color: #ffffff;
   border: none;
   border-radius: 10px;

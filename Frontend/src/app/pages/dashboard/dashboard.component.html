@@ -16,7 +16,7 @@
     </div>
 
     <nav class="sidebar-nav">
-      <button class="nav-item" *ngFor="let item of navItems"
+      <button class="nav-item" *ngFor="let item of visibleNavItems"
         [class.active]="activeNav === item.key"
         (click)="onNavChange(item.key)" [title]="item.label">
         <svg *ngIf="item.icon==='grid'"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -31,7 +31,6 @@
           <span class="nav-badge" *ngIf="notifUnread > 0">{{ notifUnread > 99 ? '99+' : notifUnread }}</span>
         </span>
         <svg *ngIf="item.icon==='location'"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-        <svg *ngIf="item.icon==='settings'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
         <span class="nav-label" *ngIf="!sidebarCollapsed">{{ item.label }}</span>
       </button>
     </nav>
@@ -59,11 +58,6 @@
     <header class="topbar">
       <div class="topbar-left">
         <h2 class="page-title">
-          {{ activeNav === 'dashboard' ? 'Dashboard' : activeNav === 'users' ? 'User Management' :
-             activeNav === 'audit' ? 'Audit Log' :
-             activeNav === 'trials' ? 'Clinical Trials' : activeNav === 'samples' ? 'Lab & Samples' :
-             activeNav === 'protocols' ? 'Protocols' : activeNav === 'reports' ? 'Reports' :
-             activeNav === 'notifications' ? 'Notifications & Alerts' : 'Settings' }}
           {{ activeNav === 'dashboard'        ? 'Dashboard'
            : activeNav === 'users'           ? 'User Management'
            : activeNav === 'audit'           ? 'Audit Log'
@@ -74,7 +68,8 @@
            : activeNav === 'sites'           ? 'Research Sites'
            : activeNav === 'create-site'     ? 'Register Site'
            : activeNav === 'reports'         ? 'Reports'
-           : 'Settings' }}
+           : activeNav === 'notifications'   ? 'Notifications & Alerts'
+           : 'Dashboard' }}
         </h2>
         <span class="breadcrumb">LifeSci360 / {{ role }}</span>
       </div>
@@ -301,9 +296,6 @@
     <!-- ══ USERS MODULE ══ -->
     <app-users *ngIf="activeNav === 'users'" [role]="role" #usersComp></app-users>
 
-    <!-- ══ AUDIT MODULE ══ -->
-    <app-audit *ngIf="activeNav === 'audit'" [role]="role"></app-audit>
-
     <!-- ══ SAMPLES MODULE ══ -->
     <app-samples *ngIf="activeNav === 'samples'" [role]="role" [currentUserId]="currentUserId" #samplesComp></app-samples>
 
@@ -312,9 +304,6 @@
 
     <!-- ══ NOTIFICATIONS MODULE ══ -->
     <app-notifications *ngIf="activeNav === 'notifications'" [role]="role" [currentUserId]="currentUserId"></app-notifications>
-
-    <!-- ══ PROTOCOLS MODULE ══ -->
-    <app-protocols *ngIf="activeNav === 'protocols'" [role]="role"></app-protocols>
 
     <!-- ══ CLINICAL TRIALS ══ -->
     <div class="content" *ngIf="activeNav === 'trials'" style="overflow-y:auto">
@@ -387,8 +376,6 @@
       </ng-container>
     </div>
 
-    <!-- ══ OTHER SECTIONS ══ -->
-    <div class="content placeholder-content" *ngIf="activeNav === 'settings'">
     <!-- ══ AUDIT LOG ══ -->
     <div class="content" *ngIf="activeNav === 'audit'">
 
@@ -422,7 +409,6 @@
                 <th>Action</th>
                 <th>Description</th>
                 <th>Target</th>
-                <th>IP Address</th>
                 <th>Status</th>
               </tr>
             </thead>
@@ -444,8 +430,7 @@
                   </span>
                 </td>
                 <td class="audit-desc">{{ log.description }}</td>
-                <td class="muted">{{ log.targetUserName || '—' }}</td>
-                <td class="muted mono">{{ log.ipAddress || '—' }}</td>
+                <td class="muted">{{ log.entityName || '—' }}</td>
                 <td>
                   <span class="status-badge" [class.active]="log.isSuccess" [class.offline]="!log.isSuccess">
                     <span class="status-dot"></span>{{ log.isSuccess ? 'Success' : 'Failed' }}
@@ -453,7 +438,7 @@
                 </td>
               </tr>
               <tr *ngIf="filteredAuditLogs.length === 0 && !auditLoading">
-                <td colspan="7" class="empty-row">No audit events found.</td>
+                <td colspan="6" class="empty-row">No audit events found.</td>
               </tr>
             </tbody>
           </table>
@@ -481,17 +466,6 @@
       <app-create-site (navigate)="onProtocolNavigate($event)"></app-create-site>
     </div>
 
-    <!-- ══ OTHER SECTIONS ══ -->
-    <div class="content placeholder-content"
-      *ngIf="activeNav !== 'dashboard' && activeNav !== 'users' && activeNav !== 'audit'
-          && activeNav !== 'protocols' && activeNav !== 'create-protocol'
-          && activeNav !== 'sites'     && activeNav !== 'create-site'">
-      <div class="placeholder-card">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-        <h3>{{ activeNav | titlecase }} Module</h3>
-        <p>This section is under development.</p>
-      </div>
-    </div>
 
   </div><!-- /main -->
 

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Shared.CL.Services;
 using Shared.Filters;
 using System.Text;
 
@@ -78,6 +79,25 @@ public static class ServiceCollectionExtensions
     {
         services.AddControllers(options =>
             options.Filters.Add<GlobalExceptionFilter>());
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the central IAuditClient pointing at AuditLogService.API.
+    /// Base URL is read from AuditService:BaseUrl (default: http://localhost:5298/).
+    /// </summary>
+    public static IServiceCollection AddAuditClient(
+        this IServiceCollection services,
+        IConfiguration config)
+    {
+        var baseUrl = config["AuditService:BaseUrl"] ?? "http://localhost:5298/";
+
+        services.AddHttpClient<IAuditClient, HttpAuditClient>(c =>
+        {
+            c.BaseAddress = new Uri(baseUrl);
+            c.Timeout     = TimeSpan.FromSeconds(3);
+        });
 
         return services;
     }

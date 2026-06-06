@@ -47,6 +47,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 
+// Audit Client
+builder.Services.AddAuditClient(builder.Configuration);
+
 // Services
 builder.Services.AddScoped<ISampleRepository, SampleRepository>();
 builder.Services.AddScoped<ILabResultRepository, LabResultRepository>();

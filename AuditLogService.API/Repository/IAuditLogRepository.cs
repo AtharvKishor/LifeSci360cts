@@ -1,13 +1,12 @@
-﻿using Shared.CL.DTOs;
+using Shared.CL.DTOs;
 
-namespace AuditLogService.API.Repository
+namespace AuditLogService.API.Repository;
+
+public interface IAuditLogRepository
 {
-    public interface IAuditLogRepository
-    {
-        Task<int> CreateLogAsync(AuditLogCreateDto dto);
-        Task<IList<AuditLogListDto>> GetAllLogsAsync();
-        Task<IList<AuditLogListDto>> GetLogsByServiceAsync(string serviceName);
-        Task<IList<AuditLogListDto>> GetErrorLogsAsync();
-        Task<IList<AuditLogListDto>> GetLogsByUserAsync(int userId);
-    }
+    Task<int>                  CreateLogAsync(AuditLogCreateDto dto);
+    Task<IList<AuditLogListDto>> GetAllLogsAsync(int limit = 500);
+    Task<IList<AuditLogListDto>> GetLogsByServiceAsync(string serviceName);
+    Task<IList<AuditLogListDto>> GetLogsByUserAsync(Guid userId);
+    Task<IList<AuditLogListDto>> GetErrorLogsAsync();
 }

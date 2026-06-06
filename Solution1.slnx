@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Services/">
     <Project Path="AuditService/AuditService.csproj" Id="30d37bf8-b56b-4632-83b5-17612d7ff94d" />
+    <Project Path="AuditLogService.API/AuditLogService.API.csproj" Id="a1b2c3d4-e5f6-7890-abcd-ef1234567890" />
     <Project Path="AuthService/AuthService.csproj" Id="2fc35a05-57e0-4667-a788-cbcd8a51c728" />
     <Project Path="NotificationService/NotificationService.csproj" Id="e753e891-5d87-4ee2-852c-091bff5115f2" />
     <Project Path="PatientService/PatientService.csproj" Id="5a0ecf6f-b5d8-4a45-85b1-78f3cdded79e" />

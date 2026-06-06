@@ -48,6 +48,10 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (this.auth.isLoggedIn()) {
+      this.router.navigate(['/dashboard'], { replaceUrl: true });
+      return;
+    }
     this.recentUsers = this.loadRecentUsers();
   }
 
@@ -82,9 +86,7 @@ export class LoginComponent implements OnInit {
     }).subscribe({
       next: (res) => {
         this.saveRecentUser(res);
-        res.role === 'Admin'
-          ? this.router.navigate(['/admin/dashboard'])
-          : this.router.navigate(['/dashboard']);
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Invalid email or password.';

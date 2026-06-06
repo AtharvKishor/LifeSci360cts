@@ -1,100 +1,92 @@
-﻿using AuditLogService.API.Data;
+using AuditLogService.API.Data;
 using AuditLogService.API.Models;
 using Microsoft.EntityFrameworkCore;
 using Shared.CL.DTOs;
 
-namespace AuditLogService.API.Repository
+namespace AuditLogService.API.Repository;
+
+public class AuditLogRepository : IAuditLogRepository
 {
-    public class AuditLogRepository : IAuditLogRepository
+    private readonly AuditLogDbContext _db;
+
+    public AuditLogRepository(AuditLogDbContext db) => _db = db;
+
+    public async Task<int> CreateLogAsync(AuditLogCreateDto dto)
     {
-        private readonly AuditLogDbContext _context;
-
-        public AuditLogRepository(AuditLogDbContext context)
+        try
         {
-            _context = context;
-        }
-
-        // Called by ActivityLogFilter and GlobalExceptionFilter
-        // from ProtocolService and SiteService
-        public async Task<int> CreateLogAsync(AuditLogCreateDto dto)
-        {
-            try
+            var log = new AuditLog
             {
-                AuditLog log = new AuditLog
-                {
-                    UserId = dto.UserId,
-                    UserEmail = dto.UserEmail,
-                    Action = dto.Action,
-                    ServiceName = dto.ServiceName,
-                    IsError = dto.IsError,
-                    ErrorMessage = dto.ErrorMessage,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                await _context.AuditLogs.AddAsync(log);
-                await _context.SaveChangesAsync();
-                return log.Id;
-            }
-            catch (Exception ex)
-            {
-                // Log to console but don't crash the service
-                Console.WriteLine($"[AuditLog ERROR] Failed to save log: {ex.Message}");
-                return -1;
-            }
+                ActorUserId  = dto.ActorUserId,
+                ActorName    = dto.ActorName,
+                ActorEmail   = dto.ActorEmail,
+                Action       = dto.Action,
+                ServiceName  = dto.ServiceName,
+                Description  = dto.Description,
+                EntityId     = dto.EntityId,
+                EntityName   = dto.EntityName,
+                IpAddress    = dto.IpAddress,
+                IsSuccess    = dto.IsSuccess,
+                ErrorMessage = dto.ErrorMessage,
+                CreatedAt    = DateTime.UtcNow
+            };
+            await _db.AuditLogs.AddAsync(log);
+            await _db.SaveChangesAsync();
+            return log.Id;
         }
-
-        // Get all logs — newest first
-        public async Task<IList<AuditLogListDto>> GetAllLogsAsync()
+        catch (Exception ex)
         {
-            return await _context.AuditLogs
-                .AsNoTracking()
-                .OrderByDescending(l => l.CreatedAt)
-                .Select(l => ToDto(l))
-                .ToListAsync();
+            Console.WriteLine($"[AuditLogRepository] Save failed: {ex.Message}");
+            return -1;
         }
-
-        // Get logs for one service e.g. "ProtocolService"
-        public async Task<IList<AuditLogListDto>> GetLogsByServiceAsync(string serviceName)
-        {
-            return await _context.AuditLogs
-                .AsNoTracking()
-                .Where(l => l.ServiceName == serviceName)
-                .OrderByDescending(l => l.CreatedAt)
-                .Select(l => ToDto(l))
-                .ToListAsync();
-        }
-
-        // Get only error logs
-        public async Task<IList<AuditLogListDto>> GetErrorLogsAsync()
-        {
-            return await _context.AuditLogs
-                .AsNoTracking()
-                .Where(l => l.IsError == true)
-                .OrderByDescending(l => l.CreatedAt)
-                .Select(l => ToDto(l))
-                .ToListAsync();
-        }
-
-        // Get logs for one specific user
-        public async Task<IList<AuditLogListDto>> GetLogsByUserAsync(int userId)
-        {
-            return await _context.AuditLogs
-                .AsNoTracking()
-                .Where(l => l.UserId == userId)
-                .OrderByDescending(l => l.CreatedAt)
-                .Select(l => ToDto(l))
-                .ToListAsync();
-        }
-
-        private static AuditLogListDto ToDto(AuditLog l) => new AuditLogListDto
-        {
-            UserId = l.UserId,
-            UserEmail = l.UserEmail,
-            Action = l.Action,
-            ServiceName = l.ServiceName,
-            IsError = l.IsError,
-            ErrorMessage = l.ErrorMessage,
-            CreatedAt = l.CreatedAt
-        };
     }
+
+    public async Task<IList<AuditLogListDto>> GetAllLogsAsync(int limit = 500)
+        => await _db.AuditLogs
+            .AsNoTracking()
+            .OrderByDescending(l => l.CreatedAt)
+            .Take(limit)
+            .Select(l => Map(l))
+            .ToListAsync();
+
+    public async Task<IList<AuditLogListDto>> GetLogsByServiceAsync(string serviceName)
+        => await _db.AuditLogs
+            .AsNoTracking()
+            .Where(l => l.ServiceName == serviceName)
+            .OrderByDescending(l => l.CreatedAt)
+            .Select(l => Map(l))
+            .ToListAsync();
+
+    public async Task<IList<AuditLogListDto>> GetLogsByUserAsync(Guid userId)
+        => await _db.AuditLogs
+            .AsNoTracking()
+            .Where(l => l.ActorUserId == userId)
+            .OrderByDescending(l => l.CreatedAt)
+            .Select(l => Map(l))
+            .ToListAsync();
+
+    public async Task<IList<AuditLogListDto>> GetErrorLogsAsync()
+        => await _db.AuditLogs
+            .AsNoTracking()
+            .Where(l => !l.IsSuccess)
+            .OrderByDescending(l => l.CreatedAt)
+            .Select(l => Map(l))
+            .ToListAsync();
+
+    private static AuditLogListDto Map(AuditLog l) => new()
+    {
+        Id           = l.Id,
+        ActorUserId  = l.ActorUserId,
+        ActorName    = l.ActorName,
+        ActorEmail   = l.ActorEmail,
+        Action       = l.Action,
+        ServiceName  = l.ServiceName,
+        Description  = l.Description,
+        EntityId     = l.EntityId,
+        EntityName   = l.EntityName,
+        IpAddress    = l.IpAddress,
+        IsSuccess    = l.IsSuccess,
+        ErrorMessage = l.ErrorMessage,
+        CreatedAt    = l.CreatedAt
+    };
 }

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NSwag.AspNetCore;
 using Shared.CL;
+using Shared.Extensions;
 using ProtocolService.Data;
 using ProtocolService.Repositories;
 using ProtocolService.Services;
@@ -37,6 +38,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+
+// Audit Client
+builder.Services.AddAuditClient(builder.Configuration);
 
 // Repositories
 builder.Services.AddScoped<IProtocolRepository, ProtocolRepository>();

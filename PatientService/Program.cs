@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using PatientService.Data;
 using PatientService.Repository;
 using PatientService.Services;
+using Shared.Extensions;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,9 @@ builder.Services.AddDbContext<ServicesDbContext>(options =>
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 builder.Services.AddScoped<IVisitRepository, VisitRepository>();
+
+// ── Audit Client ──────────────────────────────────────────
+builder.Services.AddAuditClient(builder.Configuration);
 
 // ── Services ──────────────────────────────────────────────
 builder.Services.AddScoped<IPatientService, PatientService.Services.PatientService>();

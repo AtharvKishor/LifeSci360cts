@@ -2,6 +2,8 @@
 using ProtocolService.Repositories;
 using ProtocolService.Enums;
 using Shared.CL.DTOs;
+using AssignmentStatus = ProtocolService.Enums.AssignmentStatus;
+using ProtocolStatus   = ProtocolService.Enums.ProtocolStatus;
 
 namespace ProtocolService.Services;
 

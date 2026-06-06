@@ -1,6 +1,8 @@
 using AuthService.Data.Entities;
 using AuthService.Helpers;
 using AuthService.Repositories;
+using Shared.CL.DTOs;
+using Shared.CL.Services;
 using Shared.DTOs;
 
 namespace AuthService.Services;
@@ -8,14 +10,20 @@ namespace AuthService.Services;
 public class AuthService : IAuthService
 {
     private readonly IAuthRepository _authRepo;
-    private readonly JwtHelper _jwtHelper;
-    private readonly IConfiguration _config;
+    private readonly JwtHelper       _jwtHelper;
+    private readonly IConfiguration  _config;
+    private readonly IAuditClient    _audit;
 
-    public AuthService(IAuthRepository authRepo, JwtHelper jwtHelper, IConfiguration config)
+    public AuthService(
+        IAuthRepository authRepo,
+        JwtHelper jwtHelper,
+        IConfiguration config,
+        IAuditClient audit)
     {
-        _authRepo = authRepo;
+        _authRepo  = authRepo;
         _jwtHelper = jwtHelper;
-        _config = config;
+        _config    = config;
+        _audit     = audit;
     }
 
     // ── Login ────────────────────────────────────────────────
@@ -26,20 +34,32 @@ public class AuthService : IAuthService
         {
             await _authRepo.AddAuditLogAsync(new AuditLog
             {
-                ActorName  = "Unknown",
-                ActorEmail = request.Email,
-                Action     = "LOGIN_FAILED",
+                ActorName   = "Unknown",
+                ActorEmail  = request.Email,
+                Action      = "LOGIN_FAILED",
                 Description = $"Failed login attempt for {request.Email}",
-                IpAddress  = ipAddress,
-                IsSuccess  = false,
-                CreatedAt  = DateTime.UtcNow
+                IpAddress   = ipAddress,
+                IsSuccess   = false,
+                CreatedAt   = DateTime.UtcNow
             });
+
+            _audit.Log(new AuditLogCreateDto
+            {
+                ActorName   = "Unknown",
+                ActorEmail  = request.Email,
+                Action      = "LOGIN_FAILED",
+                ServiceName = "AuthService",
+                Description = $"Failed login attempt for {request.Email}",
+                IpAddress   = ipAddress,
+                IsSuccess   = false
+            });
+
             throw new UnauthorizedAccessException("Invalid email or password");
         }
 
-        var token    = _jwtHelper.GenerateToken(user.UserId, user.Email, user.Role.RoleName);
-        var jti      = _jwtHelper.GetJtiFromToken(token);
-        var expMins  = _config.GetValue<int>("Jwt:ExpiryMinutes", 60);
+        var token   = _jwtHelper.GenerateToken(user.UserId, user.Email, user.Role.RoleName);
+        var jti     = _jwtHelper.GetJtiFromToken(token);
+        var expMins = _config.GetValue<int>("Jwt:ExpiryMinutes", 60);
 
         await _authRepo.CreateSessionAsync(new UserSession
         {
@@ -61,6 +81,17 @@ public class AuthService : IAuthService
             IpAddress   = ipAddress,
             IsSuccess   = true,
             CreatedAt   = DateTime.UtcNow
+        });
+
+        _audit.Log(new AuditLogCreateDto
+        {
+            ActorUserId = user.UserId,
+            ActorName   = user.Name,
+            ActorEmail  = user.Email,
+            Action      = "LOGIN",
+            ServiceName = "AuthService",
+            Description = $"{user.Name} ({user.Email}) logged in",
+            IpAddress   = ipAddress
         });
 
         return new LoginResponseDto
@@ -92,6 +123,17 @@ public class AuthService : IAuthService
                 IpAddress   = ipAddress,
                 IsSuccess   = true,
                 CreatedAt   = DateTime.UtcNow
+            });
+
+            _audit.Log(new AuditLogCreateDto
+            {
+                ActorUserId = userId,
+                ActorName   = session.User.Name,
+                ActorEmail  = session.User.Email,
+                Action      = "LOGOUT",
+                ServiceName = "AuthService",
+                Description = $"{session.User.Name} ({session.User.Email}) logged out",
+                IpAddress   = ipAddress
             });
         }
     }
@@ -135,6 +177,18 @@ public class AuthService : IAuthService
             CreatedAt      = DateTime.UtcNow
         });
 
+        _audit.Log(new AuditLogCreateDto
+        {
+            ActorUserId = actorUserId,
+            ActorName   = actorName,
+            ActorEmail  = actorEmail,
+            Action      = "USER_ENROLLED",
+            ServiceName = "AuthService",
+            Description = $"{actorName} enrolled {dto.Name} ({dto.Email}) as {dto.RoleName}",
+            EntityId    = created.UserId.ToString(),
+            EntityName  = dto.Name
+        });
+
         return new EnrollUserResponseDto
         {
             UserId    = created.UserId,
@@ -160,7 +214,7 @@ public class AuthService : IAuthService
         var role = await _authRepo.GetRoleByNameAsync(dto.RoleName)
             ?? throw new InvalidOperationException($"Role '{dto.RoleName}' not found.");
 
-        var oldRole = user.Role.RoleName;
+        var oldRole   = user.Role.RoleName;
         user.Name     = dto.Name;
         user.Phone    = dto.Phone;
         user.RoleId   = role.RoleId;
@@ -179,6 +233,18 @@ public class AuthService : IAuthService
             TargetUserName = user.Name,
             IsSuccess      = true,
             CreatedAt      = DateTime.UtcNow
+        });
+
+        _audit.Log(new AuditLogCreateDto
+        {
+            ActorUserId = actorUserId,
+            ActorName   = actorName,
+            ActorEmail  = actorEmail,
+            Action      = "USER_UPDATED",
+            ServiceName = "AuthService",
+            Description = $"{actorName} updated {user.Name} ({user.Email}) — role: {oldRole} → {role.RoleName}, active: {dto.IsActive}",
+            EntityId    = user.UserId.ToString(),
+            EntityName  = user.Name
         });
 
         return new EnrollUserResponseDto
@@ -219,10 +285,10 @@ public class AuthService : IAuthService
     public async Task<DashboardStatsDto> GetDashboardStatsAsync() =>
         new DashboardStatsDto
         {
-            ActiveUsers       = await _authRepo.GetActiveUserCountAsync(),
-            TotalEnrolled     = await _authRepo.GetTotalEnrolledCountAsync(),
-            ActiveSessions    = await _authRepo.GetActiveSessionCountAsync(),
-            AuditEventsToday  = await _authRepo.GetAuditEventsTodayCountAsync()
+            ActiveUsers      = await _authRepo.GetActiveUserCountAsync(),
+            TotalEnrolled    = await _authRepo.GetTotalEnrolledCountAsync(),
+            ActiveSessions   = await _authRepo.GetActiveSessionCountAsync(),
+            AuditEventsToday = await _authRepo.GetAuditEventsTodayCountAsync()
         };
 
     // ── Active sessions ──────────────────────────────────────
@@ -241,7 +307,7 @@ public class AuthService : IAuthService
         }).ToList();
     }
 
-    // ── Audit logs ───────────────────────────────────────────
+    // ── Audit logs (AuthService local store — kept for backward compat) ───────
     public async Task<List<AuditLogDto>> GetAuditLogsAsync()
     {
         var logs = await _authRepo.GetAuditLogsAsync(100);

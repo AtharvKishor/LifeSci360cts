@@ -37,6 +37,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   editForm!: FormGroup;
   filteredAuditLogs: AuditLogEntry[] = [];
   auditLoading = false;
+  auditFilter = '';
+
+  readonly protocolSubNavs = ['create-protocol', 'create-site'];
 
   stats = [
     { label: 'Active Users',       value: '—', delta: '', up: true,  icon: 'users',    color: '#e8f5e9', accent: '#2e7d32' },
@@ -60,7 +63,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     { key: 'protocols',     label: 'Protocols',       icon: 'doc'      },
     { key: 'reports',       label: 'Reports',         icon: 'chart'    },
     { key: 'notifications', label: 'Notifications',   icon: 'bell'     },
-    { key: 'settings',      label: 'Settings',        icon: 'settings' },
   ];
 
   constructor(
@@ -79,13 +81,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     e.stopPropagation();
     this.showProfileMenu = !this.showProfileMenu;
   }
-
-  // Protocol module nav keys (not shown in sidebar, navigated programmatically)
-  readonly protocolSubNavs = ['create-protocol', 'create-site'];
-
-  onProtocolNavigate(key: string): void { this.activeNav = key; }
-
-  constructor(private auth: AuthService, private fb: FormBuilder, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.email = this.auth.getEmail() ?? '';
@@ -114,19 +109,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
     } else {
       this.statsLoading    = false;
       this.sessionsLoading = false;
-      this.loadSamples();
+      if (this.isResearchScientist || this.isLabTechnician) {
+        this.loadSamples();
+      }
     }
 
-    if (this.isClinicalTrialManager && !this.isAdmin) this.activeNav = 'trials';
+    if (this.isClinicalTrialManager) this.activeNav = 'trials';
+    else if (this.isRegulatoryOfficer) { this.activeNav = 'audit'; this.loadAuditLogs(); }
+    else if (this.isDataManager) this.activeNav = 'reports';
 
     const pending = this.trialsNav.consumePending();
-    if (pending) {
+    if (pending && this.canAccessTrials) {
       this.activeNav = 'trials';
       this.trialsView = pending;
     }
 
     this.navSub = this.trialsNav.nav$.subscribe(view => {
-      if (!view) return;
+      if (!view || !this.canAccessTrials) return;
       this.activeNav = 'trials';
       this.trialsView = view;
       this.cdr.detectChanges();
@@ -140,13 +139,33 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   get isSystemAdmin(): boolean { return this.role === 'SYSTEM_ADMIN'; }
   get isAdmin(): boolean { return this.role === 'ADMIN' || this.isSystemAdmin; }
+  get isResearchScientist(): boolean { return (this.role || '').toUpperCase() === 'RESEARCH_SCIENTIST'; }
+  get isLabTechnician(): boolean { return (this.role || '').toUpperCase() === 'LAB_TECHNICIAN'; }
+  get isRegulatoryOfficer(): boolean { return (this.role || '').toUpperCase() === 'REGULATORY_OFFICER'; }
+  get isDataManager(): boolean { return (this.role || '').toUpperCase() === 'DATA_MANAGER'; }
   get currentUserId(): string { return localStorage.getItem('userId') ?? ''; }
-  get canCreateSample(): boolean { return this.role === 'LAB_TECHNICIAN' || this.isAdmin; }
+  get canCreateSample(): boolean { return this.isLabTechnician || this.isAdmin; }
   get isClinicalTrialManager(): boolean {
     const r = (this.role || '').toUpperCase();
     return r === 'CLINICAL_TRIAL' || r === 'CLINICAL_TRIAL_MANAGER' || r.startsWith('CLINICAL');
   }
-  get canAccessTrials(): boolean { return this.isAdmin || this.isClinicalTrialManager; }
+  get canAccessTrials(): boolean { return this.isAdmin || this.isClinicalTrialManager || this.isDataManager; }
+
+  get allowedNavKeys(): string[] {
+    if (this.isAdmin) {
+      return ['dashboard', 'users', 'audit', 'trials', 'samples', 'protocols', 'create-protocol', 'sites', 'create-site', 'reports', 'notifications'];
+    }
+    if (this.isResearchScientist) return ['dashboard', 'samples', 'protocols', 'notifications'];
+    if (this.isLabTechnician)     return ['dashboard', 'samples', 'notifications'];
+    if (this.isClinicalTrialManager) return ['dashboard', 'trials', 'notifications'];
+    if (this.isRegulatoryOfficer) return ['dashboard', 'audit', 'reports', 'notifications'];
+    if (this.isDataManager)       return ['dashboard', 'trials', 'reports', 'notifications'];
+    return ['dashboard', 'notifications'];
+  }
+
+  get visibleNavItems() {
+    return this.navItems.filter(item => this.allowedNavKeys.includes(item.key));
+  }
 
   trialsView = 'patients-list';
   setTrialsView(view: string) { this.trialsView = view; }
@@ -226,6 +245,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
+  loadAuditLogs(): void {
+    this.auditLoading = true;
+    this.auth.getAuditLogs().subscribe({
+      next: logs => {
+        this.filteredAuditLogs = logs;
+        this.auditLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => { this.auditLoading = false; this.cdr.detectChanges(); }
+    });
+  }
+
   loadUnreadCount(): void {
     this.notify.getUnreadCount().subscribe({
       next: c => { this.notifUnread = c.count; this.cdr.detectChanges(); },
@@ -234,8 +265,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   onNavChange(key: string): void {
+    if (!this.allowedNavKeys.includes(key)) return;
     this.activeNav = key;
+    if (key === 'audit') this.loadAuditLogs();
     this.cdr.detectChanges();
+  }
+
+  onProtocolNavigate(key: string): void {
+    if (this.allowedNavKeys.includes(key)) this.activeNav = key;
   }
 
   enrollEmployee(): void {
