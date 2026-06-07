@@ -32,22 +32,7 @@ services:
       "
     restart: "no"
 
-  userservice:
-    build:
-      context: .
-      dockerfile: UserService/Dockerfile
-    environment:
-      ASPNETCORE_URLS: "http://+:8080"
-      ConnectionStrings__ServicesDb: "Server=sqlserver,1433;Database=LifeSci360_Services;User Id=lifesci_app;Password=LifeSci@App2024!;TrustServerCertificate=True;"
-      Jwt__Secret: "LifeSci360_JWT_Secret_Min_32_Chars_Here!"
-      Jwt__ExpiryMinutes: "60"
-    ports:
-      - "5001:8080"
-    depends_on:
-      db-init:
-        condition: service_completed_successfully
-
-  authservice:
+authservice:
     build:
       context: .
       dockerfile: AuthService/Dockerfile
@@ -185,7 +170,6 @@ services:
     ports:
       - "5000:8080"
     depends_on:
-      - userservice
       - authservice
       - patientservice
       - protocolservice
