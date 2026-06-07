@@ -15,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Database
 builder.Services.AddDbContext<ProtocolDbContext>(opts =>
     opts.UseSqlServer(
-        builder.Configuration.GetConnectionString("LifeSci360_Services"),
+        builder.Configuration.GetConnectionString("ServicesDb"),
         sql => sql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)));
 
 // JWT

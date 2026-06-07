@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // ── Database ──────────────────────────────────────────────
 builder.Services.AddDbContext<ServicesDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("ClinicalDB")));
+        builder.Configuration.GetConnectionString("ServicesDb")));
 
 // ── Repositories ──────────────────────────────────────────
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
