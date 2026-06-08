@@ -9,7 +9,9 @@ public record NotificationDto(
     string Channel,        // IN_APP | EMAIL | SMS
     string Status,         // UNREAD | READ | ESCALATED | ARCHIVED
     DateTime CreatedAt,
-    DateTime? ReadAt
+    DateTime? ReadAt,
+    Guid? SentByUserId = null,
+    string? RecipientName = null
 );
 
 // ── Requests ──────────────────────────────────────────────────────────────────

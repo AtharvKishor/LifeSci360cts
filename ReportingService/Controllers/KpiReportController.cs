@@ -55,7 +55,6 @@ public class KpiReportController(
 
     // POST api/reporting/reports
     [HttpPost("reports")]
-    [Authorize(Roles = "DATA_MANAGER,ADMIN,SYSTEM_ADMIN")]
     public async Task<IActionResult> Create([FromBody] CreateKpiReportDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);

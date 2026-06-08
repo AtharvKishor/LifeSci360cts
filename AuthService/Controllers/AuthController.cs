@@ -26,10 +26,35 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
-        var ip        = HttpContext.Connection.RemoteIpAddress?.ToString();
-        var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
-        var result    = await _authService.LoginAsync(request, ip, userAgent);
-        return Ok(result);
+        try
+        {
+            var ip        = HttpContext.Connection.RemoteIpAddress?.ToString();
+            var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+            var result    = await _authService.LoginAsync(request, ip, userAgent);
+            return Ok(result);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+    }
+
+    // POST api/auth/reset-password
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        try
+        {
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+            await _authService.ResetPasswordAsync(dto, ip);
+            return Ok(new { message = "Password updated successfully." });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
     }
 
     // POST api/auth/logout

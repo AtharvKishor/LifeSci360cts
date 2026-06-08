@@ -7,6 +7,7 @@ public interface IAuthService
     Task<LoginResponseDto> LoginAsync(LoginRequestDto request, string? ipAddress, string? userAgent);
     Task LogoutAsync(string jti, Guid userId, string? ipAddress);
     Task LogoutAllAsync(Guid userId);
+    Task ResetPasswordAsync(ResetPasswordDto dto, string? ipAddress);
 
     // Enrollment
     Task<EnrollUserResponseDto> EnrollUserAsync(EnrollUserDto dto, Guid actorUserId, string actorName, string actorEmail);

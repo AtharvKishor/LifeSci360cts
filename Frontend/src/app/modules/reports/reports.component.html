@@ -5,6 +5,10 @@
       <p class="section-sub">Operational KPIs, compliance scores, and trend analysis across studies.</p>
     </div>
     <div class="reports-actions">
+      <button class="btn btn-primary btn-sm" (click)="openGenerateModal()">
+        <svg viewBox="0 0 20 20" fill="currentColor" style="width:14px;height:14px;margin-right:4px"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+        Generate Report
+      </button>
       <button class="btn-ghost" (click)="loadReports()" title="Refresh">
         <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/></svg>
         Refresh
@@ -126,5 +130,51 @@
         </tbody>
       </table>
     </div>
+  </div>
+</div>
+
+<!-- ── Generate Report Modal ── -->
+<div class="modal-backdrop" [class.open]="showGenerateModal" (click)="closeGenerateModal()">
+  <div class="modal" style="max-width:440px" (click)="$event.stopPropagation()">
+
+    <div class="modal-head">
+      <span class="modal-title">
+        <svg viewBox="0 0 20 20" fill="currentColor" style="width:16px;height:16px"><path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V8z" clip-rule="evenodd"/></svg>
+        Generate Report
+      </span>
+      <button class="btn btn-sm" (click)="closeGenerateModal()" style="padding:4px 8px">✕</button>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="reports-error" *ngIf="generateError" style="margin-bottom:12px">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+        {{ generateError }}
+      </div>
+
+      <div class="mfield">
+        <label>Report Scope</label>
+        <select class="modal-select" [(ngModel)]="generateScope">
+          <option *ngFor="let s of scopeOptions" [value]="s">{{ scopeLabel(s) }}</option>
+        </select>
+        <span style="font-size:11px;color:#6b7280">Metrics are calculated automatically from live data.</span>
+      </div>
+
+      <div class="mfield">
+        <label>Protocol ID <span style="color:#9ca3af;font-weight:400">(optional)</span></label>
+        <input class="modal-input" type="text" [(ngModel)]="generateProtocolId" placeholder="e.g. 3fa85f64-5717-4562-b3fc-2c963f66afa6"/>
+        <span style="font-size:11px;color:#6b7280">Leave blank to generate a global report.</span>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-sm" (click)="closeGenerateModal()" [disabled]="generateLoading">Cancel</button>
+      <button class="btn btn-primary btn-sm" (click)="submitGenerateReport()" [disabled]="generateLoading">
+        <span *ngIf="generateLoading" class="spinner-sm" style="margin-right:4px"></span>
+        {{ generateLoading ? 'Generating...' : 'Generate' }}
+      </button>
+    </div>
+
   </div>
 </div>

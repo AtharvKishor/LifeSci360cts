@@ -23,6 +23,10 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   notifCategoryFilter = '';
   notifCategories = NOTIFICATION_CATEGORIES;
 
+  activeTab: 'inbox' | 'sent' = 'inbox';
+  sentNotifications: NotificationItem[] = [];
+  sentLoading = false;
+
   showSendPanel = false;
   notifForm!: FormGroup;
   notifSending = false;
@@ -97,6 +101,19 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     this.notify.getUnreadCount().subscribe({
       next: c => { this.notifUnread = c.count; this.cdr.detectChanges(); },
       error: () => {}
+    });
+  }
+
+  switchTab(tab: 'inbox' | 'sent'): void {
+    this.activeTab = tab;
+    if (tab === 'sent' && this.sentNotifications.length === 0) this.loadSentNotifications();
+  }
+
+  loadSentNotifications(): void {
+    this.sentLoading = true;
+    this.notify.getSent().pipe(timeout(8000)).subscribe({
+      next: n => { this.sentNotifications = n; this.sentLoading = false; this.cdr.detectChanges(); },
+      error: () => { this.sentLoading = false; this.cdr.detectChanges(); }
     });
   }
 

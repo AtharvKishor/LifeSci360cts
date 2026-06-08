@@ -31,25 +31,28 @@ public class NotificationController(INotificationService svc) : ControllerBase
         [FromQuery] DateTime? to) =>
         Ok(await svc.GetHistoryAsync(CurrentUserId(), from, to));
 
+    // GET api/notifications/sent
+    [HttpGet("sent")]
+    public async Task<IActionResult> GetSent() =>
+        Ok(await svc.GetSentAsync(CurrentUserId()));
+
     // POST api/notifications
     [HttpPost("")]
-    [Authorize(Roles = "ADMIN,SYSTEM_ADMIN,DATA_MANAGER")]
     public async Task<IActionResult> Create([FromBody] CreateNotificationDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var list = await svc.CreateAsync(dto);
+        var list = await svc.CreateAsync(dto, CurrentUserId());
         return Ok(list);
     }
 
     // POST api/notifications/broadcast
     [HttpPost("broadcast")]
-    [Authorize(Roles = "ADMIN,SYSTEM_ADMIN")]
     public async Task<IActionResult> Broadcast([FromBody] BroadcastNotificationDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var list = await svc.BroadcastAsync(dto);
+        var list = await svc.BroadcastAsync(dto, CurrentUserId());
         return Ok(list);
     }
 
