@@ -61,6 +61,13 @@ builder.Services.AddSwaggerWithJwt(title: "AuthService API", description: "Authe
 
 var app = builder.Build();
 
+// Apply pending EF migrations (creates AuditLogs table on first run)
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ServicesDbContext>();
+    db.Database.Migrate();
+}
+
 // Ensure SYSTEM_ADMIN role exists
 using (var scope = app.Services.CreateScope())
 {

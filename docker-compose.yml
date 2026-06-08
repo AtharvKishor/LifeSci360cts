@@ -26,9 +26,17 @@ services:
         condition: service_healthy
     volumes:
       - ./db/create-login.sql:/create-login.sql
+      - ./AuthService/Migrations/baseline_tables.sql:/baseline_tables.sql
+      - ./AuthService/Migrations/seed_actors.sql:/seed_actors.sql
+      - ./ReportingService/Data/reporting_tables.sql:/reporting_tables.sql
+      - ./add_notes_and_time.sql:/add_notes_and_time.sql
     command: >
       /bin/bash -c "
-      /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P 'LifeSci@App2024!' -i /create-login.sql -No
+      /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P 'LifeSci@App2024!' -i /create-login.sql -No &&
+      /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P 'LifeSci@App2024!' -d LifeSci360_Services -i /baseline_tables.sql -No &&
+      /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P 'LifeSci@App2024!' -d LifeSci360_Services -i /seed_actors.sql -No &&
+      /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P 'LifeSci@App2024!' -d LifeSci360_Services -i /reporting_tables.sql -No &&
+      /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P 'LifeSci@App2024!' -d LifeSci360_Services -i /add_notes_and_time.sql -No
       "
     restart: "no"
 
