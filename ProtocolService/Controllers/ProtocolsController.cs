@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.CL;
 using Shared.CL.DTOs;
@@ -9,6 +10,7 @@ namespace ProtocolService.Controllers;
 
 [ApiController]
 [Route("api/protocols")]
+[Authorize]
 public class ProtocolsController : ControllerBase
 {
     private readonly IProtocolService _svc;

@@ -4,6 +4,6 @@
   reportingUrl: 'http://localhost:5278',
   notificationUrl: 'http://localhost:5103',
   patientApiUrl: 'http://localhost:5276',
-  protocolApiUrl: 'http://localhost:5054', 
+  protocolApiUrl: 'https://localhost:7133',
   auditApiUrl: 'http://localhost:5298'       
 };

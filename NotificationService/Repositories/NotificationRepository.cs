@@ -171,6 +171,24 @@ public class NotificationRepository(ServicesDbContext db) : INotificationReposit
 
     // â”€â”€ Mapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+    public async Task<List<NotificationDto>> GetSentByUserAsync(Guid sentByUserId) =>
+        await db.Notifications
+            .AsNoTracking()
+            .Where(n => n.SentByUserId == sentByUserId)
+            .OrderByDescending(n => n.CreatedAt)
+            .Select(n => new NotificationDto(
+                n.NotificationId,
+                n.UserId,
+                n.Message,
+                n.Category,
+                n.Channel,
+                n.Status,
+                n.CreatedAt,
+                n.ReadAt,
+                n.SentByUserId,
+                n.User.Name))
+            .ToListAsync();
+
     private static NotificationDto ToDto(Notification n) =>
         new NotificationDto(
             NotificationId: n.NotificationId,
@@ -180,6 +198,7 @@ public class NotificationRepository(ServicesDbContext db) : INotificationReposit
             Channel: n.Channel,
             Status: n.Status,
             CreatedAt: n.CreatedAt,
-            ReadAt: n.ReadAt
+            ReadAt: n.ReadAt,
+            SentByUserId: n.SentByUserId
         );
 }

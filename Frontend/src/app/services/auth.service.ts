@@ -69,6 +69,9 @@ export class AuthService {
       })
     );
   }
+  resetPassword(dto: { email: string; newPassword: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/reset-password`, dto);
+  }
   logout(): Observable<any> {
     return this.http.post(`${this.apiUrl}/logout`, {})
       .pipe(tap(() => this.clearSession())); // After server confirms logout, clear localStorage

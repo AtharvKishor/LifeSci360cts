@@ -58,9 +58,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     { key: 'dashboard',     label: 'Dashboard',       icon: 'grid'     },
     { key: 'users',         label: 'Users',           icon: 'users'    },
     { key: 'audit',         label: 'Audit Log',       icon: 'audit'    },
-    { key: 'trials',        label: 'Clinical Trials', icon: 'flask'    },
+    { key: 'trials',        label: 'Patients',        icon: 'flask'    },
     { key: 'samples',       label: 'Lab & Samples',   icon: 'beaker'   },
     { key: 'protocols',     label: 'Protocols',       icon: 'doc'      },
+    { key: 'sites',         label: 'Research Sites',  icon: 'location' },
     { key: 'reports',       label: 'Reports',         icon: 'chart'    },
     { key: 'notifications', label: 'Notifications',   icon: 'bell'     },
   ];
@@ -114,7 +115,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     }
 
-    if (this.isClinicalTrialManager) this.activeNav = 'trials';
+    if (this.isClinicalTrialManager) this.activeNav = 'protocols';
     else if (this.isRegulatoryOfficer) { this.activeNav = 'audit'; this.loadAuditLogs(); }
     else if (this.isDataManager) this.activeNav = 'reports';
 
@@ -157,7 +158,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
     if (this.isResearchScientist) return ['dashboard', 'samples', 'protocols', 'notifications'];
     if (this.isLabTechnician)     return ['dashboard', 'samples', 'notifications'];
-    if (this.isClinicalTrialManager) return ['dashboard', 'trials', 'notifications'];
+    if (this.isClinicalTrialManager) return ['protocols', 'create-protocol', 'trials', 'notifications'];
     if (this.isRegulatoryOfficer) return ['dashboard', 'audit', 'reports', 'notifications'];
     if (this.isDataManager)       return ['dashboard', 'trials', 'reports', 'notifications'];
     return ['dashboard', 'notifications'];

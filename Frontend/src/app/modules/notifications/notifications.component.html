@@ -33,8 +33,20 @@
     {{ notifError }}
   </div>
 
+  <!-- Tab bar -->
+  <div class="notif-tabs">
+    <button class="notif-tab" [class.active]="activeTab === 'inbox'" (click)="switchTab('inbox')">
+      Inbox
+      <span class="section-badge" *ngIf="notifUnread > 0">{{ notifUnread }}</span>
+    </button>
+    <button class="notif-tab" [class.active]="activeTab === 'sent'" (click)="switchTab('sent')">
+      Sent
+      <span class="section-badge" *ngIf="sentNotifications.length > 0">{{ sentNotifications.length }}</span>
+    </button>
+  </div>
+
   <!-- Inbox -->
-  <div class="section-card">
+  <div class="section-card" *ngIf="activeTab === 'inbox'">
     <div class="section-header">
       <h4>Inbox</h4>
       <div class="reports-table-tools">
@@ -80,6 +92,57 @@
       </li>
       <li class="re-empty" *ngIf="notifications.length === 0">No notifications.</li>
     </ul>
+  </div>
+
+  <!-- Sent -->
+  <div class="section-card" *ngIf="activeTab === 'sent'">
+    <div class="section-header">
+      <h4>Sent Notifications</h4>
+      <div class="reports-table-tools">
+        <button class="btn-ghost" (click)="loadSentNotifications()" title="Refresh" style="padding:4px 10px;font-size:12px">Refresh</button>
+        <span class="section-badge">{{ sentNotifications.length }}</span>
+      </div>
+    </div>
+
+    <div class="re-loading" *ngIf="sentLoading">
+      <div class="spinner-lg"></div><span>Loading sent notifications...</span>
+    </div>
+
+    <div class="table-wrap table-wrap--scroll" *ngIf="!sentLoading">
+      <table>
+        <thead class="thead-sticky">
+          <tr>
+            <th>Recipient</th>
+            <th>Category</th>
+            <th>Message</th>
+            <th>Channel</th>
+            <th>Status</th>
+            <th>Sent At</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let n of sentNotifications">
+            <td class="muted">{{ n.recipientName || '—' }}</td>
+            <td>
+              <span class="cat-chip"
+                [style.background]="categoryColor(n.category)"
+                [style.color]="categoryText(n.category)">
+                {{ n.category }}
+              </span>
+            </td>
+            <td style="max-width:320px;white-space:normal">{{ n.message }}</td>
+            <td class="muted">{{ n.channel }}</td>
+            <td>
+              <span class="role-chip">{{ n.status }}</span>
+            </td>
+            <td class="muted">{{ n.createdAt | date:'dd MMM yyyy, HH:mm' }}</td>
+          </tr>
+          <tr *ngIf="sentNotifications.length === 0">
+            <td colspan="6" class="empty-row">No notifications sent yet.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 

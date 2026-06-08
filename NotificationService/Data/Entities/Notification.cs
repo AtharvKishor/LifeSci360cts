@@ -33,6 +33,8 @@ public partial class Notification
     [Precision(0)]
     public DateTime? ReadAt { get; set; }
 
+    public Guid? SentByUserId { get; set; }
+
     [ForeignKey("UserId")]
     [InverseProperty("Notifications")]
     public virtual User User { get; set; } = null!;

@@ -30,4 +30,7 @@ public interface INotificationRepository
 
     /// <summary>User ids for the given role; when role is null/empty returns all active users.</summary>
     Task<List<Guid>> ResolveRecipientsAsync(string? role);
+
+    /// <summary>All notifications sent by a specific user (most recent first).</summary>
+    Task<List<NotificationDto>> GetSentByUserAsync(Guid sentByUserId);
 }

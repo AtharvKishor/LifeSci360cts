@@ -13,10 +13,13 @@ public interface INotificationService
     Task<NotificationHistoryDto> GetHistoryAsync(Guid userId, DateTime? from, DateTime? to);
 
     /// <summary>Creates one row per requested channel for a single user, pushes the in-app one live.</summary>
-    Task<List<NotificationDto>> CreateAsync(CreateNotificationDto dto);
+    Task<List<NotificationDto>> CreateAsync(CreateNotificationDto dto, Guid? sentByUserId = null);
 
     /// <summary>Creates notifications for every recipient (by role, or all active users).</summary>
-    Task<List<NotificationDto>> BroadcastAsync(BroadcastNotificationDto dto);
+    Task<List<NotificationDto>> BroadcastAsync(BroadcastNotificationDto dto, Guid? sentByUserId = null);
+
+    /// <summary>All notifications sent by a specific user.</summary>
+    Task<List<NotificationDto>> GetSentAsync(Guid sentByUserId);
 
     Task<bool> MarkReadAsync(Guid id, Guid userId);
     Task<int> MarkAllReadAsync(Guid userId);

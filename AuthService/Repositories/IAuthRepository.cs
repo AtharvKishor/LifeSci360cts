@@ -11,6 +11,9 @@ public interface IAuthRepository
     Task RevokeSessionAsync(string jti);
     Task RevokeAllUserSessionsAsync(Guid userId);
 
+    // Password reset
+    Task<bool> UpdatePasswordAsync(string email, string newPasswordHash);
+
     // Enrollment
     Task<bool> EmailExistsAsync(string email);
     Task<Role?> GetRoleByNameAsync(string roleName);

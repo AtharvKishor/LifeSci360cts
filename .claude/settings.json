@@ -16,7 +16,11 @@
       "Bash(sqlcmd -S \"\\(localdb\\)\\\\MSSQLLocalDB\" -d \"LifeSci360_Services\" -Q \"SELECT COUNT\\(*\\) FROM AuditLogs;\")",
       "Bash(sqlcmd -S '\\(localdb\\)\\\\MSSQLLocalDB' -Q ' *)",
       "Bash(dotnet run *)",
-      "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 5298 -ErrorAction SilentlyContinue | Select-Object -First 1\")"
+      "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 5298 -ErrorAction SilentlyContinue | Select-Object -First 1\")",
+      "Read(//c/Users/2487479/OneDrive - Cognizant/Desktop/Project/**)",
+      "Bash(xargs grep *)",
+      "Bash(sqlcmd -S \"\\(localdb\\)\\\\MSSQLLocalDB\" -d \"LifeSci360_Services\" -Q \"IF NOT EXISTS \\(SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID\\('Notifications'\\) AND name = 'SentByUserId'\\) BEGIN ALTER TABLE Notifications ADD SentByUserId uniqueidentifier NULL; PRINT 'Column added.'; END ELSE BEGIN PRINT 'Column already exists.'; END\")",
+      "Bash(taskkill /F /IM NotificationService.exe)"
     ]
   }
 }
