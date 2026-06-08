@@ -17,6 +17,8 @@ export interface NotificationItem {
   status: string;
   createdAt: string;
   readAt?: string | null;
+  sentByUserId?: string | null;
+  recipientName?: string | null;
 }
 
 export interface CreateNotificationRequest {
@@ -95,5 +97,9 @@ export class NotificationService {
 
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  getSent(): Observable<NotificationItem[]> {
+    return this.http.get<NotificationItem[]>(`${this.apiUrl}/sent`);
   }
 }

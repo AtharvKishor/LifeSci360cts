@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { firstValueFrom } from 'rxjs';
 
 export interface RecentUser {
   name: string;
@@ -25,6 +26,15 @@ export class LoginComponent implements OnInit {
   showPassword = false;
   recentUsers: RecentUser[] = [];
 
+  // Forgot password modal
+  showForgotModal = false;
+  forgotForm: FormGroup;
+  forgotLoading = false;
+  forgotError = '';
+  forgotSuccess = false;
+  showNewPassword = false;
+  showConfirmPassword = false;
+
   private readonly STORAGE_KEY = 'ls360_recent_users';
 
   private roleStyles: Record<string, { color: string; text: string }> = {
@@ -38,13 +48,20 @@ export class LoginComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
       rememberMe: [false]
     });
+
+    this.forgotForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      newPassword: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', Validators.required]
+    }, { validators: this.passwordMatchValidator });
   }
 
   ngOnInit(): void {
@@ -120,6 +137,47 @@ export class LoginComponent implements OnInit {
       return raw ? JSON.parse(raw) : [];
     } catch {
       return [];
+    }
+  }
+
+  // ── Forgot password modal ──────────────────────────────────
+  private passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
+    const pw  = group.get('newPassword')?.value;
+    const cpw = group.get('confirmPassword')?.value;
+    return pw === cpw ? null : { passwordMismatch: true };
+  }
+
+  get forgotEmail()    { return this.forgotForm.get('email'); }
+  get newPassword()    { return this.forgotForm.get('newPassword'); }
+  get confirmPassword(){ return this.forgotForm.get('confirmPassword'); }
+
+  openForgotModal(): void {
+    this.forgotForm.reset();
+    this.forgotError   = '';
+    this.forgotSuccess = false;
+    this.showForgotModal = true;
+  }
+
+  closeForgotModal(): void {
+    this.showForgotModal = false;
+  }
+
+  async submitForgotPassword(): Promise<void> {
+    if (this.forgotForm.invalid) { this.forgotForm.markAllAsTouched(); return; }
+    this.forgotLoading = true;
+    this.forgotError   = '';
+
+    try {
+      await firstValueFrom(this.auth.resetPassword({
+        email:       this.forgotForm.value.email,
+        newPassword: this.forgotForm.value.newPassword
+      }));
+      this.forgotSuccess = true;
+    } catch (err: any) {
+      this.forgotError = err.error?.message || 'Something went wrong. Please try again.';
+    } finally {
+      this.forgotLoading = false;
+      this.cdr.detectChanges();
     }
   }
 }

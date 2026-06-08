@@ -38,6 +38,16 @@ public class AuthRepository : IAuthRepository
         await _context.SaveChangesAsync();
     }
 
+    // ── Password reset ───────────────────────────────────────
+    public async Task<bool> UpdatePasswordAsync(string email, string newPasswordHash)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email && u.IsActive);
+        if (user == null) return false;
+        user.PasswordHash = newPasswordHash;
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
     // ── Enrollment ───────────────────────────────────────────
     public async Task<bool> EmailExistsAsync(string email) =>
         await _context.Users.AnyAsync(u => u.Email == email);

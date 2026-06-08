@@ -11,6 +11,7 @@ BEGIN
         SiteId   uniqueidentifier NOT NULL CONSTRAINT DF_Sites_SiteId DEFAULT (newsequentialid()),
         Name     nvarchar(150)    NOT NULL,
         Location nvarchar(255)    NULL,
+        IsActive bit              NOT NULL CONSTRAINT DF_Sites_IsActive DEFAULT (1),
         CONSTRAINT PK_Sites PRIMARY KEY (SiteId)
     );
 END;

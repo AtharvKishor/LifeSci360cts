@@ -30,10 +30,10 @@ public class NotificationService(
         return repo.GetHistoryAsync(userId, fromUtc, toUtc);
     }
 
-    public async Task<List<NotificationDto>> CreateAsync(CreateNotificationDto dto)
-        => await CreateForUserAsync(dto.UserId, dto.Message, dto.Category, dto.Channels);
+    public async Task<List<NotificationDto>> CreateAsync(CreateNotificationDto dto, Guid? sentByUserId = null)
+        => await CreateForUserAsync(dto.UserId, dto.Message, dto.Category, dto.Channels, sentByUserId);
 
-    public async Task<List<NotificationDto>> BroadcastAsync(BroadcastNotificationDto dto)
+    public async Task<List<NotificationDto>> BroadcastAsync(BroadcastNotificationDto dto, Guid? sentByUserId = null)
     {
         var recipients = await repo.ResolveRecipientsAsync(dto.Role);
         logger.LogInformation(
@@ -43,11 +43,14 @@ public class NotificationService(
         var created = new List<NotificationDto>();
         foreach (var userId in recipients)
         {
-            var rows = await CreateForUserAsync(userId, dto.Message, dto.Category, dto.Channels);
+            var rows = await CreateForUserAsync(userId, dto.Message, dto.Category, dto.Channels, sentByUserId);
             created.AddRange(rows);
         }
         return created;
     }
+
+    public Task<List<NotificationDto>> GetSentAsync(Guid sentByUserId)
+        => repo.GetSentByUserAsync(sentByUserId);
 
     public async Task<bool> MarkReadAsync(Guid id, Guid userId)
     {
@@ -108,7 +111,7 @@ public class NotificationService(
     /// simulates EMAIL/SMS sends, and pushes IN_APP rows live over SignalR.
     /// </summary>
     private async Task<List<NotificationDto>> CreateForUserAsync(
-        Guid userId, string message, string category, List<string>? channels)
+        Guid userId, string message, string category, List<string>? channels, Guid? sentByUserId = null)
     {
         var effectiveChannels = (channels is { Count: > 0 })
             ? channels
@@ -126,7 +129,8 @@ public class NotificationService(
                 Category = category,
                 Channel = channel.ToUpper(),
                 Status = "UNREAD",
-                CreatedAt = now
+                CreatedAt = now,
+                SentByUserId = sentByUserId
             });
         }
 

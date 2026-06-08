@@ -126,9 +126,57 @@
       <span class="ferr" *ngIf="createForm.get('sampleType')?.touched && createForm.get('sampleType')?.invalid">Sample type is required.</span>
     </div>
     <div class="field">
-      <label>Enrollment ID <span class="req">*</span></label>
-      <input type="text" formControlName="enrollmentId" placeholder="e.g. E0000000-0000-0000-0000-000000000001"/>
-      <span class="ferr" *ngIf="createForm.get('enrollmentId')?.touched && createForm.get('enrollmentId')?.invalid">Enrollment ID is required.</span>
+      <label>Patient Enrollment <span class="req">*</span></label>
+
+      <!-- Selected chip -->
+      <div *ngIf="selectedEnrollmentLabel" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;margin-bottom:6px;">
+        <svg viewBox="0 0 20 20" fill="currentColor" style="width:16px;height:16px;color:#15803d;flex-shrink:0"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        <span style="flex:1;font-size:13px;font-weight:500;color:#15803d;">{{ selectedEnrollmentLabel }}</span>
+        <button type="button" (click)="clearEnrollment()" style="background:none;border:none;cursor:pointer;color:#6b7280;font-size:16px;line-height:1;padding:0;">&times;</button>
+      </div>
+
+      <!-- Search input (hidden once selected) -->
+      <div *ngIf="!selectedEnrollmentLabel" style="position:relative;width:100%;">
+        <input
+          type="text"
+          [(ngModel)]="enrollmentSearch"
+          [ngModelOptions]="{standalone:true}"
+          placeholder="Search by patient name or protocol..."
+          (focus)="enrollmentDropdownOpen = true"
+          (input)="enrollmentDropdownOpen = true"
+          (blur)="enrollmentDropdownOpen = false"
+          autocomplete="off"
+          style="width:100%;box-sizing:border-box;padding-right:36px;"
+        />
+        <svg *ngIf="enrollmentsLoading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          style="position:absolute;right:10px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#9ca3af;">
+          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+        </svg>
+        <svg *ngIf="!enrollmentsLoading" viewBox="0 0 20 20" fill="currentColor"
+          style="position:absolute;right:10px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#9ca3af;pointer-events:none;">
+          <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+        </svg>
+
+        <!-- Dropdown list -->
+        <div *ngIf="enrollmentDropdownOpen"
+          style="position:absolute;z-index:999;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:220px;overflow-y:auto;">
+          <div *ngIf="enrollmentsLoading" style="padding:14px 16px;text-align:center;color:#9ca3af;font-size:13px;">Loading enrollments...</div>
+          <div *ngIf="!enrollmentsLoading && filteredEnrollments.length === 0"
+            style="padding:14px 16px;text-align:center;color:#9ca3af;font-size:13px;">No active enrollments found.</div>
+          <div *ngFor="let e of filteredEnrollments; let last = last"
+            (mousedown)="selectEnrollment(e)"
+            style="padding:10px 14px;cursor:pointer;transition:background .1s;"
+            [style.border-bottom]="last ? 'none' : '1px solid #f5f3ef'"
+            onmouseover="this.style.background='#f5f3ef'" onmouseout="this.style.background=''">
+            <div style="font-size:13px;font-weight:600;color:#1a1a1a;">{{ e.patientName }}</div>
+            <div style="font-size:12px;color:#6b7280;margin-top:2px;">{{ e.protocolTitle }} &middot; {{ e.siteName }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hidden form control -->
+      <input type="hidden" formControlName="enrollmentId"/>
+      <span class="ferr" *ngIf="createForm.get('enrollmentId')?.touched && createForm.get('enrollmentId')?.invalid">Please select a patient enrollment.</span>
     </div>
     <div class="field">
       <label>Collection Date &amp; Time <span class="req">*</span></label>

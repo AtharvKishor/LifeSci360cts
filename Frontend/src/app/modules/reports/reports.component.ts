@@ -23,6 +23,13 @@ export class ReportsComponent implements OnInit {
   scopeOptions = KPI_SCOPES;
   pdfDownloading = false;
 
+  // Generate report modal
+  showGenerateModal = false;
+  generateScope: KpiScopeName = 'Enrollment';
+  generateProtocolId = '';
+  generateLoading = false;
+  generateError = '';
+
   kpiCards = [
     { key: 'enrollmentRate',       label: 'Enrollment Rate',   trendKey: 'enrollmentRateChange',       color: '#e3f2fd', accent: '#1565c0' },
     { key: 'sampleProcessingRate', label: 'Sample Processing', trendKey: 'sampleProcessingRateChange', color: '#e8f5e9', accent: '#2e7d32' },
@@ -120,6 +127,38 @@ export class ReportsComponent implements OnInit {
       'Compliance': 'Compliance', 'SitePerformance': 'Site Performance'
     };
     return map[scope] ?? scope;
+  }
+
+  openGenerateModal(): void {
+    this.generateScope = 'Enrollment';
+    this.generateProtocolId = '';
+    this.generateError = '';
+    this.showGenerateModal = true;
+  }
+
+  closeGenerateModal(): void { this.showGenerateModal = false; }
+
+  submitGenerateReport(): void {
+    this.generateLoading = true;
+    this.generateError = '';
+    const userId = localStorage.getItem('userId') ?? '';
+    this.reporting.createReport({
+      scope: this.scopeOptions.indexOf(this.generateScope),
+      generatedByUserId: userId,
+      protocolId: this.generateProtocolId.trim() || null
+    }).subscribe({
+      next: () => {
+        this.generateLoading = false;
+        this.showGenerateModal = false;
+        this.loadReports();
+        this.cdr.detectChanges();
+      },
+      error: err => {
+        this.generateLoading = false;
+        this.generateError = err.error?.error || err.error?.message || 'Failed to generate report.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   private saveBlob(blob: Blob, filename: string): void {

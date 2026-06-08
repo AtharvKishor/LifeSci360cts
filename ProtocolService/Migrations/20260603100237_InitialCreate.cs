@@ -32,7 +32,7 @@ namespace ProtocolService.Migrations
                         column: x => x.CreatedByUserId,
                         principalTable: "Users",
                         principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(
@@ -79,7 +79,7 @@ namespace ProtocolService.Migrations
                         column: x => x.InvestigatorUserId,
                         principalTable: "Users",
                         principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateIndex(

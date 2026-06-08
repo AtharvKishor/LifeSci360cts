@@ -141,6 +141,41 @@ public class AuthService : IAuthService
     public async Task LogoutAllAsync(Guid userId) =>
         await _authRepo.RevokeAllUserSessionsAsync(userId);
 
+    // ── Reset password ───────────────────────────────────────
+    public async Task ResetPasswordAsync(ResetPasswordDto dto, string? ipAddress)
+    {
+        var user = await _authRepo.GetUserByEmailAsync(dto.Email);
+        if (user == null)
+            throw new KeyNotFoundException("No active account found with that email.");
+
+        var newHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+        await _authRepo.UpdatePasswordAsync(dto.Email, newHash);
+        await _authRepo.RevokeAllUserSessionsAsync(user.UserId);
+
+        await _authRepo.AddAuditLogAsync(new AuditLog
+        {
+            ActorUserId = user.UserId,
+            ActorName   = user.Name,
+            ActorEmail  = user.Email,
+            Action      = "PASSWORD_RESET",
+            Description = $"{user.Name} ({user.Email}) reset their password",
+            IpAddress   = ipAddress,
+            IsSuccess   = true,
+            CreatedAt   = DateTime.UtcNow
+        });
+
+        _audit.Log(new AuditLogCreateDto
+        {
+            ActorUserId = user.UserId,
+            ActorName   = user.Name,
+            ActorEmail  = user.Email,
+            Action      = "PASSWORD_RESET",
+            ServiceName = "AuthService",
+            Description = $"{user.Name} ({user.Email}) reset their password",
+            IpAddress   = ipAddress
+        });
+    }
+
     // ── Enroll ───────────────────────────────────────────────
     public async Task<EnrollUserResponseDto> EnrollUserAsync(
         EnrollUserDto dto, Guid actorUserId, string actorName, string actorEmail)

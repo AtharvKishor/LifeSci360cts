@@ -2,6 +2,8 @@ import { Component, OnInit, ChangeDetectorRef, Input } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { finalize, timeout } from 'rxjs';
 import { SampleService, SampleListDto, SampleCreateDto, SampleUpdateDto } from '../../../services/sample.service';
+import { EnrollmentService } from '../../../services/enrollment.service';
+import { Enrollment } from '../../../models/enrollment';
 
 // Validator 1 — collected date cannot be in the future
 function noFutureDateValidator(control: AbstractControl): ValidationErrors | null {
@@ -35,6 +37,12 @@ export class SamplesComponent implements OnInit {
   createError = '';
   createSuccess = '';
 
+  enrollments: Enrollment[] = [];
+  enrollmentsLoading = false;
+  enrollmentSearch = '';
+  enrollmentDropdownOpen = false;
+  selectedEnrollmentLabel = '';
+
   showEditPanel = false;
   editForm!: FormGroup;
   editingSample: SampleListDto | null = null;
@@ -54,7 +62,12 @@ export class SamplesComponent implements OnInit {
   get canEdit(): boolean    { return this.role === 'LAB_TECHNICIAN' || this.isAdmin; }
   get canUpdateStatus(): boolean { return this.role === 'LAB_TECHNICIAN' || this.role === 'RESEARCH_SCIENTIST' || this.isAdmin; }
 
-  constructor(private sampleSvc: SampleService, private fb: FormBuilder, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private sampleSvc: SampleService,
+    private enrollmentSvc: EnrollmentService,
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.createForm = this.fb.group({
@@ -103,9 +116,48 @@ export class SamplesComponent implements OnInit {
     this.createForm.reset({ collectedByUserId: this.currentUserId });
     this.createError = '';
     this.createSuccess = '';
+    this.enrollmentSearch = '';
+    this.selectedEnrollmentLabel = '';
+    this.enrollmentDropdownOpen = false;
     this.showCreatePanel = true;
+    this.loadEnrollments();
   }
-  closeCreatePanel(): void { this.showCreatePanel = false; }
+  closeCreatePanel(): void { this.showCreatePanel = false; this.enrollmentDropdownOpen = false; }
+
+  loadEnrollments(): void {
+    this.enrollmentsLoading = true;
+    this.enrollmentSvc.getAll().subscribe({
+      next: (res: any) => {
+        this.enrollments = (res.data ?? res) as Enrollment[];
+        this.enrollmentsLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => { this.enrollmentsLoading = false; this.cdr.detectChanges(); }
+    });
+  }
+
+  get filteredEnrollments(): Enrollment[] {
+    const q = this.enrollmentSearch.toLowerCase().trim();
+    return this.enrollments.filter(e =>
+      e.enrollmentStatus === 'ACTIVE' &&
+      (!q || e.patientName.toLowerCase().includes(q) || e.protocolTitle.toLowerCase().includes(q) || e.siteName.toLowerCase().includes(q))
+    );
+  }
+
+  selectEnrollment(e: Enrollment): void {
+    this.createForm.patchValue({ enrollmentId: e.enrollmentId });
+    this.selectedEnrollmentLabel = `${e.patientName} — ${e.protocolTitle}`;
+    this.enrollmentSearch = '';
+    this.enrollmentDropdownOpen = false;
+    this.cdr.detectChanges();
+  }
+
+  clearEnrollment(): void {
+    this.createForm.patchValue({ enrollmentId: '' });
+    this.selectedEnrollmentLabel = '';
+    this.enrollmentSearch = '';
+    this.cdr.detectChanges();
+  }
 
   submitCreate(): void {
     if (this.createForm.invalid) return;
