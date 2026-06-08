@@ -1,7 +1,28 @@
 import { Component, OnInit, OnChanges, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { finalize, timeout } from 'rxjs';
 import { SampleService, SampleListDto, LabResultListDto, LabResultCreateDto, LabResultUpdateDto } from '../../../services/sample.service';
+
+// Validator 1 — result date cannot be in the future
+function noFutureDateValidator(control: AbstractControl): ValidationErrors | null {
+  if (!control.value) return null;
+  const selected = new Date(control.value);
+  const now      = new Date();
+  return selected > now ? { futureDate: true } : null;
+}
+
+// Validator 2 — result date cannot be before sample collection date
+function notBeforeCollectionDate(collectedDate: string) {
+  return (control: AbstractControl): ValidationErrors | null => {
+    if (!control.value || !collectedDate) return null;
+    const resultDate   = new Date(control.value);
+    const sampleDate   = new Date(collectedDate);
+    // compare dates only (strip time)
+    const rDate = new Date(resultDate.getFullYear(), resultDate.getMonth(), resultDate.getDate());
+    const sDate = new Date(sampleDate.getFullYear(), sampleDate.getMonth(), sampleDate.getDate());
+    return rDate < sDate ? { beforeCollection: true } : null;
+  };
+}
 
 @Component({
   selector: 'app-labresult',
@@ -41,12 +62,17 @@ export class LabResultComponent implements OnInit, OnChanges {
   constructor(private sampleSvc: SampleService, private fb: FormBuilder, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
+    const collectedDate = this.sample?.collectedDate ?? '';
     this.createForm = this.fb.group({
       sampleId:         [this.sample?.sampleId ?? ''],
       recordedByUserId: [this.currentUserId],
       testType:         ['', Validators.required],
       resultValue:      ['', Validators.required],
-      resultDate:       [new Date().toISOString().split('T')[0], Validators.required]
+      resultStatus:     [''],   // optional — Normal, Abnormal-High etc.
+      resultDate:       [
+        new Date().toISOString().split('T')[0],
+        [Validators.required, noFutureDateValidator, notBeforeCollectionDate(collectedDate)]
+      ]
     });
     this.editForm = this.fb.group({
       testType:    [''],
@@ -59,6 +85,14 @@ export class LabResultComponent implements OnInit, OnChanges {
   ngOnChanges(): void {
     if (this.sample && this.createForm) {
       this.createForm.patchValue({ sampleId: this.sample.sampleId });
+      // update resultDate validator with new sample's collection date
+      const collectedDate = this.sample.collectedDate ?? '';
+      this.createForm.get('resultDate')?.setValidators([
+        Validators.required,
+        noFutureDateValidator,
+        notBeforeCollectionDate(collectedDate)
+      ]);
+      this.createForm.get('resultDate')?.updateValueAndValidity();
       this.loadLabResults();
     }
   }
@@ -102,11 +136,12 @@ export class LabResultComponent implements OnInit, OnChanges {
     this.createError = '';
     const v = this.createForm.value;
     const dto: LabResultCreateDto = {
-      sampleId: v.sampleId,
+      sampleId:         v.sampleId,
       recordedByUserId: v.recordedByUserId || this.currentUserId,
-      testType: v.testType,
-      resultValue: v.resultValue,
-      resultDate: new Date(v.resultDate).toISOString()
+      testType:         v.testType,
+      resultValue:      v.resultValue,
+      resultStatus:     v.resultStatus   || undefined,
+      resultDate:       v.resultDate     // send as local date — no UTC conversion
     };
     this.sampleSvc.createLabResult(dto)
       .pipe(finalize(() => { this.createLoading = false; this.cdr.detectChanges(); }))
@@ -145,7 +180,7 @@ export class LabResultComponent implements OnInit, OnChanges {
     const dto: LabResultUpdateDto = {
       testType:    v.testType    || undefined,
       resultValue: v.resultValue || undefined,
-      resultDate:  v.resultDate  ? new Date(v.resultDate).toISOString() : undefined
+      resultDate:  v.resultDate  || undefined  // send as local date — no UTC conversion
     };
     this.sampleSvc.updateLabResult(this.editingResult.resultId, dto)
       .pipe(finalize(() => { this.editLoading = false; this.cdr.detectChanges(); }))

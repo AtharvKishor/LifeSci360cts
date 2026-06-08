@@ -77,8 +77,14 @@ public class SampleRepository : ISampleRepository
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        Sample? sample = await _db.Samples.FindAsync(id);
+        Sample? sample = await _db.Samples
+            .Include(s => s.LabResults)  // load related lab results
+            .FirstOrDefaultAsync(s => s.SampleId == id);
         if (sample == null) return false;
+
+        // Delete lab results first — FK constraint prevents deleting sample directly
+        if (sample.LabResults.Any())
+            _db.LabResults.RemoveRange(sample.LabResults);
 
         _db.Samples.Remove(sample);
         await _db.SaveChangesAsync();

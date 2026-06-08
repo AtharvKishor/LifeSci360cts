@@ -1,7 +1,15 @@
 import { Component, OnInit, ChangeDetectorRef, Input } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { finalize, timeout } from 'rxjs';
 import { SampleService, SampleListDto, SampleCreateDto, SampleUpdateDto } from '../../../services/sample.service';
+
+// Validator 1 — collected date cannot be in the future
+function noFutureDateValidator(control: AbstractControl): ValidationErrors | null {
+  if (!control.value) return null;
+  const selected = new Date(control.value);
+  const now      = new Date();
+  return selected > now ? { futureDate: true } : null;
+}
 
 @Component({
   selector: 'app-samples',
@@ -53,7 +61,7 @@ export class SamplesComponent implements OnInit {
       enrollmentId:      ['', Validators.required],
       collectedByUserId: [this.currentUserId],
       sampleType:        ['', Validators.required],
-      collectedDate:     ['', Validators.required]
+      collectedDate:     ['', [Validators.required, noFutureDateValidator]]
     });
     this.editForm = this.fb.group({ sampleType: [''] });
     this.statusForm = this.fb.group({ status: ['', Validators.required] });
@@ -108,7 +116,7 @@ export class SamplesComponent implements OnInit {
       enrollmentId:      v.enrollmentId,
       collectedByUserId: v.collectedByUserId || this.currentUserId,
       sampleType:        v.sampleType,
-      collectedDate:     new Date(v.collectedDate).toISOString()
+      collectedDate:     v.collectedDate  // send as local time — no UTC conversion
     };
     this.sampleSvc.createSample(dto)
       .pipe(finalize(() => { this.createLoading = false; this.cdr.detectChanges(); }))

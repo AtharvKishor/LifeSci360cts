@@ -18,22 +18,31 @@ builder.Services.AddDbContext<ProtocolDbContext>(opts =>
         builder.Configuration.GetConnectionString("ServicesDb"),
         sql => sql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)));
 
-// JWT
-var jwt = builder.Configuration.GetSection("Jwt");
+// JWT — same pattern as SampleService/AuthService
+var jwtSecret = builder.Configuration["Jwt:Secret"]
+    ?? builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("Jwt:Secret is not configured.");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opts =>
     {
+        opts.UseSecurityTokenValidators = true;
         opts.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = jwt["Issuer"],
-            ValidAudience = jwt["Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwt["Key"]!)),
-            ClockSkew = TimeSpan.Zero
+                Encoding.UTF8.GetBytes(jwtSecret)),
+            ValidateIssuer   = false,
+            ValidateAudience = false
+        };
+        opts.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+        {
+            OnMessageReceived = ctx =>
+            {
+                var auth = ctx.Request.Headers["Authorization"].ToString();
+                if (!string.IsNullOrEmpty(auth) && auth.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                    ctx.Token = auth.Substring(7).Trim();
+                return Task.CompletedTask;
+            }
         };
     });
 
@@ -85,6 +94,21 @@ builder.Services.AddCors(opts =>
 
 var app = builder.Build();
 
+// ── Auto-apply migrations on startup ─────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ProtocolDbContext>();
+        db.Database.Migrate();
+        Console.WriteLine("[ProtocolService] Database migrations applied.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[ProtocolService] Migration warning: {ex.Message}");
+    }
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseOpenApi();
@@ -92,7 +116,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); // removed — causes redirect issues in local dev
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

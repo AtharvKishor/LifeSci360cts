@@ -133,7 +133,8 @@
     <div class="field">
       <label>Collection Date &amp; Time <span class="req">*</span></label>
       <input type="datetime-local" formControlName="collectedDate"/>
-      <span class="ferr" *ngIf="createForm.get('collectedDate')?.touched && createForm.get('collectedDate')?.invalid">Collection date is required.</span>
+      <span class="ferr" *ngIf="createForm.get('collectedDate')?.touched && createForm.get('collectedDate')?.errors?.['required']">Collection date is required.</span>
+      <span class="ferr" *ngIf="createForm.get('collectedDate')?.touched && createForm.get('collectedDate')?.errors?.['futureDate']">Collection date cannot be a future date.</span>
     </div>
     <div class="panel-actions">
       <button type="button" class="btn-cancel" (click)="closeCreatePanel()">Cancel</button>

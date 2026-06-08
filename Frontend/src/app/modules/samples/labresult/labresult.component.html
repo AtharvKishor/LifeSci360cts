@@ -65,10 +65,16 @@
           <tr *ngFor="let r of labResults">
             <td><span class="user-name">{{ r.testType }}</span></td>
             <td>
-              <span class="result-value-badge"
-                [class.result-normal]="r.resultValue.toLowerCase().includes('normal')"
-                [class.result-abnormal]="r.resultValue.toLowerCase().includes('abnormal')">
-                {{ r.resultValue }}
+              <!-- Result Value -->
+              <span>{{ r.resultValue }}</span>
+              <!-- Result Status badge — only if status is set -->
+              <span *ngIf="r.resultStatus"
+                class="result-status-badge"
+                [class.result-normal]="r.resultStatus === 'Normal' || r.resultStatus === 'Negative'"
+                [class.result-abnormal]="r.resultStatus === 'Abnormal - High' || r.resultStatus === 'Abnormal - Low' || r.resultStatus === 'Positive' || r.resultStatus === 'Borderline'"
+                [class.result-critical]="r.resultStatus === 'Critical High' || r.resultStatus === 'Critical Low'"
+                [class.result-inconclusive]="r.resultStatus === 'Inconclusive'">
+                {{ r.resultStatus }}
               </span>
             </td>
             <td class="muted">{{ r.resultDate | date:'dd MMM yyyy' }}</td>
@@ -158,13 +164,30 @@
     </div>
     <div class="field">
       <label>Result Value <span class="req">*</span></label>
-      <input type="text" formControlName="resultValue" placeholder="e.g. Normal, Abnormal - High WBC"/>
+      <input type="text" formControlName="resultValue" placeholder="e.g. 12.5 g/dL, 98%, Negative"/>
       <span class="ferr" *ngIf="createForm.get('resultValue')?.touched && createForm.get('resultValue')?.invalid">Result value is required.</span>
+    </div>
+    <div class="field">
+      <label>Result Status</label>
+      <select formControlName="resultStatus">
+        <option value="">-- Select Status (Optional) --</option>
+        <option value="Normal">Normal</option>
+        <option value="Abnormal - High">Abnormal - High</option>
+        <option value="Abnormal - Low">Abnormal - Low</option>
+        <option value="Critical High">Critical High</option>
+        <option value="Critical Low">Critical Low</option>
+        <option value="Positive">Positive</option>
+        <option value="Negative">Negative</option>
+        <option value="Borderline">Borderline</option>
+        <option value="Inconclusive">Inconclusive</option>
+      </select>
     </div>
     <div class="field">
       <label>Result Date <span class="req">*</span></label>
       <input type="date" formControlName="resultDate"/>
-      <span class="ferr" *ngIf="createForm.get('resultDate')?.touched && createForm.get('resultDate')?.invalid">Result date is required.</span>
+      <span class="ferr" *ngIf="createForm.get('resultDate')?.touched && createForm.get('resultDate')?.errors?.['required']">Result date is required.</span>
+      <span class="ferr" *ngIf="createForm.get('resultDate')?.touched && createForm.get('resultDate')?.errors?.['futureDate']">Result date cannot be a future date.</span>
+      <span class="ferr" *ngIf="createForm.get('resultDate')?.touched && createForm.get('resultDate')?.errors?.['beforeCollection']">Result date cannot be before the sample collection date.</span>
     </div>
     <div class="panel-actions">
       <button type="button" class="btn-cancel" (click)="closeCreatePanel()">Cancel</button>

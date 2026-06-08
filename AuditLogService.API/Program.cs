@@ -39,8 +39,17 @@ var app = builder.Build();
 // ── Auto-create DB table if it doesn't exist ──────────────
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AuditLogDbContext>();
-    db.Database.EnsureCreated();
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AuditLogDbContext>();
+        db.Database.EnsureCreated();
+        Console.WriteLine("[AuditLogService] Database ready.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[AuditLogService] DB init warning: {ex.Message}");
+        Console.WriteLine("[AuditLogService] Run create_audit_db.sql in SSMS to create DB manually.");
+    }
 }
 
 app.UseSwagger();

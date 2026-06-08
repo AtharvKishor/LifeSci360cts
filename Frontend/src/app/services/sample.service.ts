@@ -41,6 +41,7 @@ export interface LabResultListDto {
   recordedByUserName: string;
   testType: string;
   resultValue: string;
+  resultStatus?: string;  // optional — Normal/Abnormal/Critical etc.
   resultDate: string;
 }
 
@@ -49,12 +50,14 @@ export interface LabResultCreateDto {
   recordedByUserId: string;
   testType: string;
   resultValue: string;
+  resultStatus?: string;  // optional
   resultDate: string;
 }
 
 export interface LabResultUpdateDto {
   testType?: string;
   resultValue?: string;
+  resultStatus?: string;  // optional
   resultDate?: string;
 }
 

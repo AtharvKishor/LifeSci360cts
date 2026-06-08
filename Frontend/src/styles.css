@@ -303,8 +303,20 @@ tbody tr:hover td { background: #faf9f7; }
 .sample-summary-left h4 { font-size: .95rem; font-weight: 700; color: var(--text-main); margin-bottom: .2rem; }
 .sample-summary-left p  { font-size: .78rem; color: var(--text-muted); }
 .result-value-badge { display: inline-block; font-size: .78rem; font-weight: 500; color: var(--text-main); }
-.result-normal   { color: #15803d; font-weight: 600; }
-.result-abnormal { color: #b91c1c; font-weight: 600; }
+.result-normal      { color: #15803d; font-weight: 600; }
+.result-abnormal    { color: #b91c1c; font-weight: 600; }
+.result-critical    { color: #fff; background: #7c2d12; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+.result-inconclusive{ color: #92400e; font-weight: 600; }
+.result-status-badge {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: .72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  vertical-align: middle;
+}
 .field-hint { font-size: .72rem; color: var(--text-muted); font-style: italic; }
 .collector-role { font-size: .68rem; color: var(--green-mid); font-weight: 600; margin-left: 3px; }
 .lr-error-row { display: flex; align-items: center; gap: .65rem; background: #fff1f2; border: 1px solid #fecdd3; border-radius: 12px; padding: .85rem 1.1rem; color: #be123c; font-size: .845rem; }

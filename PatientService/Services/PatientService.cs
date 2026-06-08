@@ -47,9 +47,9 @@ public class PatientService : IPatientService
             if (!IsValidEmail(contactInfo))
                 return (false, "Please provide a valid email address.", null);
 
-            // Service decides: email is blocked only when the existing patient is ACTIVE
+            // Block duplicate email regardless of patient status
             var existing = await _repo.GetByEmailAsync(contactInfo);
-            if (existing?.PatientStatus == "ACTIVE")
+            if (existing != null)
                 return (false, "A patient with this email already exists.", null);
         }
 
