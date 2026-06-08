@@ -153,6 +153,7 @@ public class EnrollmentService : IEnrollmentService
         EnrollmentId     = e.EnrollmentId,
         PatientId        = e.PatientId,
         PatientName      = e.Patient?.Name ?? string.Empty,
+        PatientEmail     = e.Patient?.ContactInfo,
         ProtocolSiteId   = e.ProtocolSiteId,
         ProtocolTitle    = e.ProtocolSite?.Protocol?.Title ?? string.Empty,
         SiteName         = e.ProtocolSite?.Site?.Name ?? string.Empty,
