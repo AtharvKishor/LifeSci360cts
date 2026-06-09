@@ -18,10 +18,9 @@ builder.Services.AddDbContext<ProtocolDbContext>(opts =>
         builder.Configuration.GetConnectionString("ServicesDb"),
         sql => sql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)));
 
-// JWT — same pattern as SampleService/AuthService
-var jwtSecret = builder.Configuration["Jwt:Secret"]
-    ?? builder.Configuration["Jwt:Key"]
-    ?? throw new InvalidOperationException("Jwt:Secret is not configured.");
+// JWT
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("Jwt:Key is not configured.");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opts =>
     {
@@ -29,23 +28,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         opts.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtSecret)),
-            ValidateIssuer   = false,
-            ValidateAudience = false
-        };
-        opts.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
-        {
-            OnMessageReceived = ctx =>
-            {
-                var auth = ctx.Request.Headers["Authorization"].ToString();
-                if (!string.IsNullOrEmpty(auth) && auth.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-                    ctx.Token = auth.Substring(7).Trim();
-                return Task.CompletedTask;
-            }
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            ClockSkew = TimeSpan.Zero
         };
     });
-
 builder.Services.AddAuthorization();
 
 // Audit Client

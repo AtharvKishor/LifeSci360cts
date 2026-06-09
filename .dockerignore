@@ -1,0 +1,10 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.git/
+**/node_modules/
+Frontend/dist/
+**/*.user
+**/*.suo
+**/.env
+**/Thumbs.db

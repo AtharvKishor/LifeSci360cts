@@ -2,6 +2,7 @@ export interface Enrollment {
   enrollmentId: string;
   patientId: string;
   patientName: string;
+  patientEmail?: string;
   protocolSiteId: string;
   protocolTitle: string;
   siteName: string;

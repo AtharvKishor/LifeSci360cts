@@ -1,0 +1,214 @@
+services:
+
+  # ── Data Container (SQL Server + auto-init) ───────────────────────────────
+  sqlserver:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    environment:
+      SA_PASSWORD: "LifeSci@App2024!"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqldata:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'LifeSci@App2024!' -Q 'SELECT 1' -b -o /dev/null -C"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 50s
+    networks:
+      - lifesci-net
+
+  # ── Auth Service ──────────────────────────────────────────────────────────
+  auth-service:
+    build:
+      context: .
+      dockerfile: AuthService/Dockerfile
+    environment:
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__ServicesDb: "Server=sqlserver,1433;Database=LifeSci360_Services;User Id=lifesci_app;Password=LifeSci@App2024!;TrustServerCertificate=True;"
+      Jwt__Secret: "LifeSci360_JWT_Secret_Min_32_Chars_Here!"
+      Jwt__ExpiryMinutes: "60"
+      AuditService__BaseUrl: "http://auditlog-service:8080/"
+    ports:
+      - "5203:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - lifesci-net
+
+  # ── Audit Log Service ─────────────────────────────────────────────────────
+  auditlog-service:
+    build:
+      context: .
+      dockerfile: AuditLogService.API/Dockerfile
+    environment:
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__AuditDb: "Server=sqlserver,1433;Database=LifeSci360_Audit;User Id=lifesci_app;Password=LifeSci@App2024!;TrustServerCertificate=True;"
+      Cors__Origins__0: "http://frontend"
+      Cors__Origins__1: "http://localhost:4200"
+    ports:
+      - "5207:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - lifesci-net
+
+  # ── Audit Service ─────────────────────────────────────────────────────────
+  audit-service:
+    build:
+      context: .
+      dockerfile: AuditService/Dockerfile
+    environment:
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__AuditDb: "Server=sqlserver,1433;Database=LifeSci360_Audit;User Id=lifesci_app;Password=LifeSci@App2024!;TrustServerCertificate=True;"
+    ports:
+      - "5208:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - lifesci-net
+
+  # ── Patient Service ───────────────────────────────────────────────────────
+  patient-service:
+    build:
+      context: .
+      dockerfile: PatientService/Dockerfile
+    environment:
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__ServicesDb: "Server=sqlserver,1433;Database=LifeSci360_Services;User Id=lifesci_app;Password=LifeSci@App2024!;TrustServerCertificate=True;"
+      Jwt__Secret: "LifeSci360_JWT_Secret_Min_32_Chars_Here!"
+      Jwt__ExpiryMinutes: "60"
+      AuditService__BaseUrl: "http://auditlog-service:8080/"
+    ports:
+      - "5204:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - lifesci-net
+
+  # ── Protocol Service ──────────────────────────────────────────────────────
+  protocol-service:
+    build:
+      context: .
+      dockerfile: ProtocolService/Dockerfile
+    environment:
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__ServicesDb: "Server=sqlserver,1433;Database=LifeSci360_Services;User Id=lifesci_app;Password=LifeSci@App2024!;TrustServerCertificate=True;"
+      Jwt__Secret: "LifeSci360_JWT_Secret_Min_32_Chars_Here!"
+      Jwt__ExpiryMinutes: "60"
+      AuditService__BaseUrl: "http://auditlog-service:8080/"
+    ports:
+      - "5206:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - lifesci-net
+
+  # ── Sample Service ────────────────────────────────────────────────────────
+  sample-service:
+    build:
+      context: .
+      dockerfile: SampleService/Dockerfile
+    environment:
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__ServicesDb: "Server=sqlserver,1433;Database=LifeSci360_Services;User Id=lifesci_app;Password=LifeSci@App2024!;TrustServerCertificate=True;"
+      Jwt__Secret: "LifeSci360_JWT_Secret_Min_32_Chars_Here!"
+      Jwt__ExpiryMinutes: "60"
+      AuditService__BaseUrl: "http://auditlog-service:8080/"
+    ports:
+      - "5205:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - lifesci-net
+
+  # ── Reporting Service ─────────────────────────────────────────────────────
+  reporting-service:
+    build:
+      context: .
+      dockerfile: ReportingService/Dockerfile
+    environment:
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__ServicesDb: "Server=sqlserver,1433;Database=LifeSci360_Services;User Id=lifesci_app;Password=LifeSci@App2024!;TrustServerCertificate=True;"
+      Jwt__Secret: "LifeSci360_JWT_Secret_Min_32_Chars_Here!"
+      Jwt__ExpiryMinutes: "60"
+      AuditService__BaseUrl: "http://auditlog-service:8080/"
+    ports:
+      - "5201:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - lifesci-net
+
+  # ── Notification Service ──────────────────────────────────────────────────
+  notification-service:
+    build:
+      context: .
+      dockerfile: NotificationService/Dockerfile
+    environment:
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__ServicesDb: "Server=sqlserver,1433;Database=LifeSci360_Services;User Id=lifesci_app;Password=LifeSci@App2024!;TrustServerCertificate=True;"
+      Jwt__Secret: "LifeSci360_JWT_Secret_Min_32_Chars_Here!"
+      Jwt__ExpiryMinutes: "60"
+      AuditService__BaseUrl: "http://auditlog-service:8080/"
+    ports:
+      - "5202:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - lifesci-net
+
+  # ── API Gateway ───────────────────────────────────────────────────────────
+  gateway:
+    build:
+      context: .
+      dockerfile: Gateway/Dockerfile
+    environment:
+      ASPNETCORE_HTTP_PORTS: "8080"
+      Jwt__Secret: "LifeSci360_JWT_Secret_Min_32_Chars_Here!"
+      Cors__AllowedOrigin: "http://localhost:4200"
+    volumes:
+      - ./Gateway/ocelot.docker.json:/app/ocelot.json:ro
+    ports:
+      - "5100:8080"
+    depends_on:
+      - auth-service
+      - patient-service
+      - sample-service
+      - protocol-service
+      - auditlog-service
+      - notification-service
+      - reporting-service
+    networks:
+      - lifesci-net
+
+  # ── Frontend ──────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Frontend/Dockerfile
+    ports:
+      - "4200:80"
+    depends_on:
+      - gateway
+    networks:
+      - lifesci-net
+
+volumes:
+  sqldata:
+
+networks:
+  lifesci-net:
+    driver: bridge

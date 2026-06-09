@@ -170,6 +170,7 @@
             onmouseover="this.style.background='#f5f3ef'" onmouseout="this.style.background=''">
             <div style="font-size:13px;font-weight:600;color:#1a1a1a;">{{ e.patientName }}</div>
             <div style="font-size:12px;color:#6b7280;margin-top:2px;">{{ e.protocolTitle }} &middot; {{ e.siteName }}</div>
+            <div *ngIf="e.patientEmail" style="font-size:11px;color:#9ca3af;margin-top:1px;">{{ e.patientEmail }}</div>
           </div>
         </div>
       </div>
