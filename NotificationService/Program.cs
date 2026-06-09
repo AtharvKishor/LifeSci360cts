@@ -85,6 +85,13 @@ builder.Services.AddCors(o =>
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var app = builder.Build();
 
+// Bootstrap: ensure recently-added columns exist in the shared Notifications table.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ServicesDbContext>();
+    db.Database.ExecuteSqlRaw(NotificationsBootstrap.Sql);
+}
+
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();

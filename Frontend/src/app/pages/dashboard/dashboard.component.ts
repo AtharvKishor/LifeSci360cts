@@ -158,7 +158,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
     if (this.isResearchScientist) return ['dashboard', 'samples', 'protocols', 'notifications'];
     if (this.isLabTechnician)     return ['dashboard', 'samples', 'notifications'];
-    if (this.isClinicalTrialManager) return ['protocols', 'create-protocol', 'trials', 'notifications'];
+    if (this.isClinicalTrialManager) return ['protocols', 'create-protocol', 'sites', 'create-site', 'trials', 'notifications'];
     if (this.isRegulatoryOfficer) return ['dashboard', 'audit', 'reports', 'notifications'];
     if (this.isDataManager)       return ['dashboard', 'trials', 'reports', 'notifications'];
     return ['dashboard', 'notifications'];

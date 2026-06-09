@@ -1,4 +1,3 @@
-﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -11,45 +10,44 @@ namespace AuthService.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "AuditLogs",
-                columns: table => new
-                {
-                    LogId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ActorUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ActorName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    ActorEmail = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    Action = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    TargetUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    TargetUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    IpAddress = table.Column<string>(type: "nvarchar(45)", maxLength: 45, nullable: true),
-                    IsSuccess = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(getutcdate())")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AuditLogs", x => x.LogId);
-                    table.ForeignKey(
-                        name: "FK_AuditLogs_Users_ActorUserId",
-                        column: x => x.ActorUserId,
-                        principalTable: "Users",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.SetNull);
-                });
+            migrationBuilder.Sql(@"
+IF OBJECT_ID(N'dbo.AuditLogs', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.AuditLogs
+    (
+        LogId          int              IDENTITY(1,1) NOT NULL,
+        ActorUserId    uniqueidentifier NULL,
+        ActorName      nvarchar(100)    NOT NULL,
+        ActorEmail     nvarchar(150)    NOT NULL,
+        Action         nvarchar(50)     NOT NULL,
+        Description    nvarchar(500)    NOT NULL,
+        TargetUserId   uniqueidentifier NULL,
+        TargetUserName nvarchar(100)    NULL,
+        IpAddress      nvarchar(45)     NULL,
+        IsSuccess      bit              NOT NULL CONSTRAINT DF_AuditLogs_IsSuccess DEFAULT (1),
+        CreatedAt      datetime2        NOT NULL CONSTRAINT DF_AuditLogs_CreatedAt DEFAULT (getutcdate()),
+        CONSTRAINT PK_AuditLogs PRIMARY KEY (LogId),
+        CONSTRAINT FK_AuditLogs_Users_ActorUserId FOREIGN KEY (ActorUserId)
+            REFERENCES dbo.Users (UserId) ON DELETE SET NULL
+    );
+END;
 
-            migrationBuilder.CreateIndex(
-                name: "IX_AuditLogs_ActorUserId",
-                table: "AuditLogs",
-                column: "ActorUserId");
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_AuditLogs_ActorUserId' AND object_id = OBJECT_ID(N'dbo.AuditLogs'))
+BEGIN
+    CREATE INDEX IX_AuditLogs_ActorUserId ON dbo.AuditLogs (ActorUserId);
+END;
+");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "AuditLogs");
+            migrationBuilder.Sql(@"
+IF OBJECT_ID(N'dbo.AuditLogs', N'U') IS NOT NULL
+BEGIN
+    DROP TABLE dbo.AuditLogs;
+END;
+");
         }
     }
 }

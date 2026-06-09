@@ -49,7 +49,7 @@ public class ProtocolRepository : IProtocolRepository
         if (!string.IsNullOrWhiteSpace(title))
             query = query.Where(p => EF.Functions.Like(p.Title, "%" + title + "%"));
 
-        return await query.OrderByDescending(p => p.ProtocolId).ToListAsync();
+        return await query.OrderByDescending(p => p.CreatedAt).ToListAsync();
     }
 
     public async Task AddAsync(Protocol protocol)

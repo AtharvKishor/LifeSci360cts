@@ -127,13 +127,14 @@ public class ProtocolSiteServiceImpl : IProtocolSiteService
     public async Task<List<InvestigatorDto>> GetInvestigatorsAsync()
     {
         var users = await _repo.GetAllUsersAsync();
-        return users.Select(u => new InvestigatorDto
-        {
-            UserId = u.UserId,
-            Name   = u.Name,
-            Email  = u.Email,
-            Role   = u.Role?.RoleName ?? string.Empty
-        }).ToList();
+        return users
+            .Select(u => new InvestigatorDto
+            {
+                UserId = u.UserId,
+                Name   = u.Name,
+                Email  = u.Email,
+                Role   = u.Role?.RoleName ?? string.Empty
+            }).ToList();
     }
 
     // â”€â”€ Private Helpers (pure business logic â€” no DB access) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

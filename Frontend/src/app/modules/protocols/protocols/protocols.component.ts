@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, ChangeDetectorRef, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import {
@@ -81,6 +81,52 @@ export class ProtocolsComponent implements OnInit {
   sitesLoading        = false;
   investigators: InvestigatorResponse[] = [];
   investigatorsLoading = false;
+
+  showSiteDropdown = false;
+  showInvDropdown  = false;
+
+  get sortedSites(): SiteResponse[] {
+    return [...this.sites].sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  get sortedInvestigators(): InvestigatorResponse[] {
+    return [...this.investigators].sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  getSelectedSiteName(): string {
+    const id = this.assignForm.get('siteId')?.value;
+    if (!id) return 'Choose a research site...';
+    const s = this.sites.find(x => x.siteId === id);
+    return s ? `${s.name}${s.location ? ' — ' + s.location : ''}` : 'Choose a research site...';
+  }
+
+  getSelectedInvName(): string {
+    const id = this.assignForm.get('investigatorUserId')?.value;
+    if (!id) return 'Select investigator...';
+    const inv = this.investigators.find(x => x.userId === id);
+    return inv ? `${inv.name} (${inv.email})` : 'Select investigator...';
+  }
+
+  selectSite(s: SiteResponse): void {
+    this.assignForm.patchValue({ siteId: s.siteId });
+    this.assignForm.get('siteId')?.markAsTouched();
+    this.showSiteDropdown = false;
+  }
+
+  selectInvestigator(inv: InvestigatorResponse): void {
+    this.assignForm.patchValue({ investigatorUserId: inv.userId });
+    this.assignForm.get('investigatorUserId')?.markAsTouched();
+    this.showInvDropdown = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(e: MouseEvent): void {
+    const target = e.target as HTMLElement;
+    if (!target.closest('.custom-select')) {
+      this.showSiteDropdown = false;
+      this.showInvDropdown  = false;
+    }
+  }
 
 
   constructor(
@@ -266,7 +312,9 @@ export class ProtocolsComponent implements OnInit {
     this.assignError       = '';
     this.assignSuccess     = '';
     this.assignForm.reset({ siteId: '', investigatorUserId: '' });
-    this.showAssignModal = true;
+    this.showAssignModal   = true;
+    this.showSiteDropdown  = false;
+    this.showInvDropdown   = false;
     if (this.sites.length === 0)        this.loadSites();
     if (this.investigators.length === 0) this.loadInvestigators();
   }

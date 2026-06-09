@@ -36,9 +36,10 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// ── Auto-create DB table if it doesn't exist ──────────────
+// ── Bootstrap AuditLogs table: create if missing, ALTER in any missing columns ──
 using (var scope = app.Services.CreateScope())
 {
+<<<<<<< Updated upstream
     try
     {
         var db = scope.ServiceProvider.GetRequiredService<AuditLogDbContext>();
@@ -50,6 +51,11 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine($"[AuditLogService] DB init warning: {ex.Message}");
         Console.WriteLine("[AuditLogService] Run create_audit_db.sql in SSMS to create DB manually.");
     }
+=======
+    var db = scope.ServiceProvider.GetRequiredService<AuditLogDbContext>();
+    db.Database.EnsureCreated(); // creates the DB itself if it doesn't exist
+    db.Database.ExecuteSqlRaw(AuditLogService.API.Data.AuditLogsBootstrap.Sql);
+>>>>>>> Stashed changes
 }
 
 app.UseSwagger();

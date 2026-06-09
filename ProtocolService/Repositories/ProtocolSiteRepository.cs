@@ -87,12 +87,12 @@ public class ProtocolSiteRepository : IProtocolSiteRepository
         return users.ToDictionary(u => u.UserId, u => u.Name);
     }
 
-    // Returns all active users for investigator dropdown
+    // Returns all active RESEARCH_SCIENTIST users for investigator dropdown
     public async Task<List<User>> GetAllUsersAsync()
     {
         return await _db.Users
             .Include(u => u.Role)
-            .Where(u => u.IsActive)
+            .Where(u => u.IsActive && u.Role != null && u.Role.RoleName == "RESEARCH_SCIENTIST")
             .OrderBy(u => u.Name)
             .ToListAsync();
     }

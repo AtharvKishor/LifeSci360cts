@@ -19,6 +19,24 @@ export class SitesComponent implements OnInit {
   searchName     = '';
   searchLocation = '';
 
+  // Pagination
+  currentPage = 1;
+  readonly pageSize = 12;
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredSites.length / this.pageSize);
+  }
+  get pageNumbers(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+  get pagedSites(): SiteResponse[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredSites.slice(start, start + this.pageSize);
+  }
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) this.currentPage = page;
+  }
+
   // View modal
   viewSite: SiteResponse | null = null;
   viewProtocols: ProtocolSiteResponse[] = [];
@@ -55,14 +73,42 @@ export class SitesComponent implements OnInit {
   loadSites(): void {
     this.loading = true;
     this.error   = '';
+    this.currentPage = 1;
     this.svc.getSites().subscribe({
       next: data => { this.sites = data; this.loading = false; this.cdr.detectChanges(); },
       error: ()   => { this.error = 'Could not load sites. Is the service running?'; this.loading = false; this.cdr.detectChanges(); }
     });
   }
 
+  /** Sort sites newest-first replicating SQL Server's uniqueidentifier byte comparison.
+   *  Groups 4 & 5 are big-endian (compare as-is).
+   *  Groups 1, 2, 3 are little-endian (reverse byte pairs before comparing). */
+  private revPairs(hex: string): string {
+    return (hex.match(/../g) ?? []).reverse().join('');
+  }
+
+  private sortByNewest(list: SiteResponse[]): SiteResponse[] {
+    return list.sort((a, b) => {
+      const ap = a.siteId.toUpperCase().split('-');
+      const bp = b.siteId.toUpperCase().split('-');
+      // Group 5 — bytes 10-15, big-endian, primary key
+      if (ap[4] !== bp[4]) return bp[4].localeCompare(ap[4]);
+      // Group 4 — bytes 8-9, big-endian
+      if (ap[3] !== bp[3]) return bp[3].localeCompare(ap[3]);
+      // Group 3 — bytes 6-7, little-endian → reverse pairs
+      const r3a = this.revPairs(ap[2]), r3b = this.revPairs(bp[2]);
+      if (r3a !== r3b) return r3b.localeCompare(r3a);
+      // Group 2 — bytes 4-5, little-endian → reverse pairs
+      const r2a = this.revPairs(ap[1]), r2b = this.revPairs(bp[1]);
+      if (r2a !== r2b) return r2b.localeCompare(r2a);
+      // Group 1 — bytes 0-3, little-endian → reverse pairs
+      const r1a = this.revPairs(ap[0]), r1b = this.revPairs(bp[0]);
+      return r1b.localeCompare(r1a);
+    });
+  }
+
   get filteredSites(): SiteResponse[] {
-    let list = this.sites;
+    let list = this.sortByNewest([...this.sites]);
     if (this.searchName.trim())
       list = list.filter(s => s.name.toLowerCase().includes(this.searchName.toLowerCase()));
     if (this.searchLocation.trim())
@@ -70,7 +116,7 @@ export class SitesComponent implements OnInit {
     return list;
   }
 
-  clearFilters(): void { this.searchName = ''; this.searchLocation = ''; }
+  clearFilters(): void { this.searchName = ''; this.searchLocation = ''; this.currentPage = 1; }
 
   get stats() {
     return { total: this.sites.length, active: this.sites.filter(s => s.protocolCount > 0).length };
@@ -148,5 +194,8 @@ export class SitesComponent implements OnInit {
   }
   assignFg(s: string): string {
     return ({ ACTIVE: '#15803d', INACTIVE: '#a16207', CLOSED: '#991b1b' })[s] ?? '#555';
+  }
+  getProtocolsByStatus(status: string): ProtocolSiteResponse[] {
+    return this.viewProtocols.filter(p => p.status === status);
   }
 }

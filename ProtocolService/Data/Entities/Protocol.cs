@@ -32,6 +32,9 @@ public partial class Protocol
 
     public Guid CreatedByUserId { get; set; }
 
+    [Precision(0)]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
     [InverseProperty("Protocol")]
     public virtual ICollection<ComplianceReport> ComplianceReports { get; set; } = new List<ComplianceReport>();
 

@@ -26,7 +26,7 @@ app-dashboard { display: block; height: 100%; }
 
 /* Module component hosts — must be flex children of .main so .content inside them can scroll */
 app-users, app-audit, app-samples, app-reports, app-notifications,
-app-trials, app-protocols, app-settings {
+app-trials, app-settings {
   display: flex;
   flex: 1;
   flex-direction: column;

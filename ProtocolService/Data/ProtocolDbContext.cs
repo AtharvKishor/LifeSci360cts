@@ -44,7 +44,9 @@ public class ProtocolDbContext : DbContext
         mb.Entity<Site>(e =>
         {
             e.ToTable("Sites");
-            e.Property(x => x.SiteId).HasDefaultValueSql("NEWSEQUENTIALID()");
+            e.Property(x => x.SiteId)
+             .HasDefaultValueSql("NEWSEQUENTIALID()")
+             .ValueGeneratedOnAdd();
             e.Property(x => x.IsActive).IsRequired().HasDefaultValue(true);
         });
 

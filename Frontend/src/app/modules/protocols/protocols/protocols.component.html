@@ -3,7 +3,7 @@
   <!-- ── Page Header ──────────────────────────────────────────── -->
   <div class="page-header">
     <div>
-      <h2 class="section-title">Protocols</h2>
+      <h3 class="section-title">Protocols</h3>
     </div>
     <button class="btn-primary" (click)="goCreate()">
       <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
@@ -13,21 +13,41 @@
 
   <!-- ── Stats Bar ─────────────────────────────────────────────── -->
   <div class="stats-row">
-    <div class="stat-pill total">
-      <span class="pill-val">{{ stats.total }}</span>
-      <span class="pill-lbl">Total</span>
+    <div class="stat-pill">
+      <div class="stat-top">
+        <div class="stat-icon-wrap" style="background:#e8f5e9; color:#2e7d32;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        </div>
+      </div>
+      <p class="pill-val">{{ stats.total }}</p>
+      <p class="pill-lbl">Total</p>
     </div>
-    <div class="stat-pill upcoming">
-      <span class="pill-val">{{ stats.upcoming }}</span>
-      <span class="pill-lbl">Upcoming</span>
+    <div class="stat-pill">
+      <div class="stat-top">
+        <div class="stat-icon-wrap" style="background:#dbeafe; color:#1d4ed8;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+      </div>
+      <p class="pill-val">{{ stats.upcoming }}</p>
+      <p class="pill-lbl">Upcoming</p>
     </div>
-    <div class="stat-pill ongoing">
-      <span class="pill-val">{{ stats.ongoing }}</span>
-      <span class="pill-lbl">Ongoing</span>
+    <div class="stat-pill">
+      <div class="stat-top">
+        <div class="stat-icon-wrap" style="background:#dcfce7; color:#15803d;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+      </div>
+      <p class="pill-val">{{ stats.ongoing }}</p>
+      <p class="pill-lbl">Ongoing</p>
     </div>
-    <div class="stat-pill completed">
-      <span class="pill-val">{{ stats.completed }}</span>
-      <span class="pill-lbl">Completed</span>
+    <div class="stat-pill">
+      <div class="stat-top">
+        <div class="stat-icon-wrap" style="background:#f1f5f9; color:#64748b;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+      </div>
+      <p class="pill-val">{{ stats.completed }}</p>
+      <p class="pill-lbl">Completed</p>
     </div>
   </div>
 
@@ -127,7 +147,7 @@
             <td colspan="7" class="empty-row">
               <div class="empty-state">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6M9 16h6M13 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V8l-7-5z"/></svg>
-                <span>No protocols found. <button class="link-btn" (click)="goCreate()">Create one →</button></span>
+                <span>No protocols found.</span>
               </div>
             </td>
           </tr>
@@ -396,12 +416,19 @@
           <div class="loading-row mini" *ngIf="sitesLoading">
             <div class="spinner-sm-dark"></div><span>Loading sites...</span>
           </div>
-          <select formControlName="siteId" *ngIf="!sitesLoading">
-            <option value="" disabled selected>Choose a research site...</option>
-            <option *ngFor="let s of sites" [value]="s.siteId">
-              {{ s.name }}{{ s.location ? ' — ' + s.location : '' }}
-            </option>
-          </select>
+          <div class="custom-select" *ngIf="!sitesLoading">
+            <button type="button" class="custom-select-trigger" (click)="showSiteDropdown=!showSiteDropdown"
+              [class.open]="showSiteDropdown" [class.has-value]="assignForm.get('siteId')?.value">
+              <span>{{ getSelectedSiteName() }}</span>
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+            </button>
+            <div class="custom-select-list" *ngIf="showSiteDropdown">
+              <div class="custom-select-option" *ngFor="let s of sortedSites"
+                (click)="selectSite(s)" [class.selected]="assignForm.get('siteId')?.value === s.siteId">
+                {{ s.name }}{{ s.location ? ' — ' + s.location : '' }}
+              </div>
+            </div>
+          </div>
           <span class="ferr" *ngIf="assignForm.get('siteId')?.touched && assignForm.get('siteId')?.invalid">Please select a site.</span>
         </div>
 
@@ -411,12 +438,19 @@
           <div class="loading-row mini" *ngIf="investigatorsLoading">
             <div class="spinner-sm-dark"></div><span>Loading investigators...</span>
           </div>
-          <select formControlName="investigatorUserId" *ngIf="!investigatorsLoading">
-            <option value="" disabled selected>Select investigator...</option>
-            <option *ngFor="let inv of investigators" [value]="inv.userId">
-              {{ inv.name }} ({{ inv.email }})
-            </option>
-          </select>
+          <div class="custom-select" *ngIf="!investigatorsLoading">
+            <button type="button" class="custom-select-trigger" (click)="showInvDropdown=!showInvDropdown"
+              [class.open]="showInvDropdown" [class.has-value]="assignForm.get('investigatorUserId')?.value">
+              <span>{{ getSelectedInvName() }}</span>
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+            </button>
+            <div class="custom-select-list" *ngIf="showInvDropdown">
+              <div class="custom-select-option" *ngFor="let inv of sortedInvestigators"
+                (click)="selectInvestigator(inv)" [class.selected]="assignForm.get('investigatorUserId')?.value === inv.userId">
+                {{ inv.name }} ({{ inv.email }})
+              </div>
+            </div>
+          </div>
           <span class="ferr" *ngIf="assignForm.get('investigatorUserId')?.touched && assignForm.get('investigatorUserId')?.invalid">Please select an investigator.</span>
         </div>
       </div>

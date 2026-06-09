@@ -4,7 +4,6 @@
   <div class="page-header">
     <div>
       <h3 class="section-title">Research Sites</h3>
-      <p class="section-sub">Manage clinical research sites and their protocol assignments.</p>
     </div>
     <button class="btn-primary" (click)="goCreate()">
       <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
@@ -15,16 +14,31 @@
   <!-- ── Stats ────────────────────────────────────────────────── -->
   <div class="stats-row">
     <div class="stat-pill">
-      <span class="pill-val">{{ stats.total }}</span>
-      <span class="pill-lbl">Total Sites</span>
+      <div class="stat-top">
+        <div class="stat-icon-wrap" style="background:#e8f5e9; color:#2e7d32;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </div>
+      </div>
+      <p class="pill-val">{{ stats.total }}</p>
+      <p class="pill-lbl">Total Sites</p>
     </div>
-    <div class="stat-pill active-pill">
-      <span class="pill-val">{{ stats.active }}</span>
-      <span class="pill-lbl">In Protocols</span>
+    <div class="stat-pill">
+      <div class="stat-top">
+        <div class="stat-icon-wrap" style="background:#dbeafe; color:#1d4ed8;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        </div>
+      </div>
+      <p class="pill-val">{{ stats.active }}</p>
+      <p class="pill-lbl">In Protocols</p>
     </div>
-    <div class="stat-pill idle-pill">
-      <span class="pill-val">{{ stats.total - stats.active }}</span>
-      <span class="pill-lbl">Not Assigned</span>
+    <div class="stat-pill">
+      <div class="stat-top">
+        <div class="stat-icon-wrap" style="background:#f1f5f9; color:#64748b;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+      </div>
+      <p class="pill-val">{{ stats.total - stats.active }}</p>
+      <p class="pill-lbl">Not Assigned</p>
     </div>
   </div>
 
@@ -55,7 +69,7 @@
 
   <!-- ── Sites Grid ─────────────────────────────────────────────── -->
   <div class="sites-grid" *ngIf="!loading && filteredSites.length > 0">
-    <div class="site-card" *ngFor="let s of filteredSites">
+    <div class="site-card" *ngFor="let s of pagedSites">
       <div class="site-card-head">
         <div class="site-avatar">{{ initials(s.name) }}</div>
         <div class="site-card-info">
@@ -88,6 +102,19 @@
         </button>
       </div>
     </div>
+  </div>
+
+  <!-- ── Pagination ──────────────────────────────────────────────── -->
+  <div class="pagination-row" *ngIf="!loading && totalPages > 1">
+    <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+    </button>
+    <button class="page-btn" *ngFor="let p of pageNumbers"
+      [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+    <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+    </button>
+    <span class="page-info">{{ (currentPage-1)*pageSize+1 }}–{{ currentPage*pageSize > filteredSites.length ? filteredSites.length : currentPage*pageSize }} of {{ filteredSites.length }}</span>
   </div>
 
   <!-- ── Empty State ───────────────────────────────────────────── -->
@@ -140,20 +167,44 @@
       <div class="loading-row mini" *ngIf="viewProtocolsLoading">
         <div class="spinner-sm-dark"></div><span>Loading protocols...</span>
       </div>
-      <div class="view-sites-list" *ngIf="!viewProtocolsLoading">
-        <div class="proto-assign-row" *ngFor="let p of viewProtocols">
-          <div class="proto-assign-info">
-            <span class="proto-assign-title">{{ p.protocolTitle }}</span>
-            <span class="proto-assign-inv">Investigator: {{ p.investigatorName }}</span>
+      <div class="proto-columns" *ngIf="!viewProtocolsLoading">
+
+        <!-- Active -->
+        <div class="proto-col">
+          <div class="proto-col-header active-header">
+            <span>Active</span>
+            <span class="proto-col-count">{{ getProtocolsByStatus('ACTIVE').length }}</span>
           </div>
-          <span class="assign-chip"
-            [style.background]="assignBg(p.status)"
-            [style.color]="assignFg(p.status)">
-            {{ p.status }}
-          </span>
+          <div class="proto-col-list">
+            <div class="proto-assign-row" *ngFor="let p of getProtocolsByStatus('ACTIVE')">
+              <div class="proto-assign-info">
+                <span class="proto-assign-title">{{ p.protocolTitle }}</span>
+                <span class="proto-assign-inv">Investigator: {{ p.investigatorName }}</span>
+              </div>
+            </div>
+            <p class="no-sites" *ngIf="getProtocolsByStatus('ACTIVE').length === 0">None</p>
+          </div>
         </div>
-        <p class="no-sites" *ngIf="viewProtocols.length === 0">No protocols assigned to this site yet.</p>
+
+        <!-- Closed -->
+        <div class="proto-col">
+          <div class="proto-col-header closed-header">
+            <span>Closed</span>
+            <span class="proto-col-count">{{ getProtocolsByStatus('CLOSED').length }}</span>
+          </div>
+          <div class="proto-col-list">
+            <div class="proto-assign-row" *ngFor="let p of getProtocolsByStatus('CLOSED')">
+              <div class="proto-assign-info">
+                <span class="proto-assign-title">{{ p.protocolTitle }}</span>
+                <span class="proto-assign-inv">Investigator: {{ p.investigatorName }}</span>
+              </div>
+            </div>
+            <p class="no-sites" *ngIf="getProtocolsByStatus('CLOSED').length === 0">None</p>
+          </div>
+        </div>
+
       </div>
+      <p class="no-sites" *ngIf="!viewProtocolsLoading && viewProtocols.length === 0">No protocols assigned to this site yet.</p>
     </div>
 
   </div>

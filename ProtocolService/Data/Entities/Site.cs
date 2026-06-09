@@ -9,6 +9,7 @@ namespace ProtocolService.Data.Entities;
 public partial class Site
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid SiteId { get; set; }
 
     [StringLength(150)]
