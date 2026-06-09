@@ -82,14 +82,9 @@ export class EnrollPatient implements OnInit {
 
   // ── Enrollment window helpers ──
   getEnrollmentWindowEnd(p: Protocol): Date | null {
-    if (!p.startDate || !p.endDate) return null;
-    const start = new Date(p.startDate);
-    const end   = new Date(p.endDate);
-    const durationDays = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
-    const windowDays   = Math.floor(durationDays * 0.10);
-    const windowEnd    = new Date(start);
-    windowEnd.setDate(start.getDate() + windowDays);
-    return windowEnd;
+    if (!p.endDate) return null;
+    // Enrollment allowed until protocol end date
+    return new Date(p.endDate);
   }
 
   isWindowClosed(p: Protocol): boolean {

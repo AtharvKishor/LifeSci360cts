@@ -36,11 +36,12 @@ public class LabResultRepository : ILabResultRepository
     {
         LabResult result = new()
         {
-            SampleId = dto.SampleId,
+            SampleId         = dto.SampleId,
             RecordedByUserId = dto.RecordedByUserId,
-            TestType = dto.TestType,
-            ResultValue = dto.ResultValue,
-            ResultDate = dto.ResultDate
+            TestType         = dto.TestType,
+            ResultValue      = dto.ResultValue,
+            ResultStatus     = dto.ResultStatus,
+            ResultDate       = dto.ResultDate
         };
 
         _db.LabResults.Add(result);
@@ -54,9 +55,10 @@ public class LabResultRepository : ILabResultRepository
         LabResult? result = await _db.LabResults.FindAsync(id);
         if (result == null) return null;
 
-        if (dto.TestType != null) result.TestType = dto.TestType;
-        if (dto.ResultValue != null) result.ResultValue = dto.ResultValue;
-        if (dto.ResultDate.HasValue) result.ResultDate = dto.ResultDate.Value;
+        if (dto.TestType     != null)        result.TestType     = dto.TestType;
+        if (dto.ResultValue  != null)        result.ResultValue  = dto.ResultValue;
+        if (dto.ResultStatus != null)        result.ResultStatus = dto.ResultStatus;
+        if (dto.ResultDate.HasValue)         result.ResultDate   = dto.ResultDate.Value;
 
         await _db.SaveChangesAsync();
         return await GetByIdAsync(id);
@@ -74,12 +76,13 @@ public class LabResultRepository : ILabResultRepository
 
     private static LabResultListDto ToDto(LabResult r) => new()
     {
-        ResultId = r.ResultId,
-        SampleId = r.SampleId,
-        RecordedByUserId = r.RecordedByUserId,
+        ResultId           = r.ResultId,
+        SampleId           = r.SampleId,
+        RecordedByUserId   = r.RecordedByUserId,
         RecordedByUserName = r.RecordedByUser?.Name ?? string.Empty,
-        TestType = r.TestType,
-        ResultValue = r.ResultValue,
-        ResultDate = r.ResultDate
+        TestType           = r.TestType,
+        ResultValue        = r.ResultValue,
+        ResultStatus       = r.ResultStatus,
+        ResultDate         = r.ResultDate
     };
 }

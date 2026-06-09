@@ -75,9 +75,10 @@ export class LabResultComponent implements OnInit, OnChanges {
       ]
     });
     this.editForm = this.fb.group({
-      testType:    [''],
-      resultValue: [''],
-      resultDate:  ['']
+      testType:     [''],
+      resultValue:  [''],
+      resultStatus: [''],
+      resultDate:   ['']
     });
     if (this.sample) this.loadLabResults();
   }
@@ -164,9 +165,10 @@ export class LabResultComponent implements OnInit, OnChanges {
     this.editError = '';
     this.editSuccess = '';
     this.editForm.setValue({
-      testType:    result.testType,
-      resultValue: result.resultValue,
-      resultDate:  result.resultDate ? result.resultDate.split('T')[0] : ''
+      testType:     result.testType,
+      resultValue:  result.resultValue,
+      resultStatus: result.resultStatus ?? '',
+      resultDate:   result.resultDate ? result.resultDate.split('T')[0] : ''
     });
     this.showEditPanel = true;
   }

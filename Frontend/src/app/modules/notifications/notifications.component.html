@@ -39,7 +39,7 @@
       Inbox
       <span class="section-badge" *ngIf="notifUnread > 0">{{ notifUnread }}</span>
     </button>
-    <button class="notif-tab" [class.active]="activeTab === 'sent'" (click)="switchTab('sent')">
+    <button class="notif-tab" *ngIf="canSend" [class.active]="activeTab === 'sent'" (click)="switchTab('sent')">
       Sent
       <span class="section-badge" *ngIf="sentNotifications.length > 0">{{ sentNotifications.length }}</span>
     </button>
@@ -77,7 +77,7 @@
           <div class="notif-top">
             <span class="cat-chip" [style.background]="categoryColor(n.category)" [style.color]="categoryText(n.category)">{{ n.category }}</span>
             <span class="notif-status" *ngIf="n.status === 'ESCALATED'">ESCALATED</span>
-            <span class="notif-time">{{ n.createdAt | date:'dd MMM yyyy, HH:mm' }}</span>
+            <span class="notif-time">{{ n.createdAt + 'Z' | date:'dd MMM yyyy, HH:mm' }}</span>
           </div>
           <p class="notif-msg">{{ n.message }}</p>
         </div>
@@ -135,7 +135,7 @@
             <td>
               <span class="role-chip">{{ n.status }}</span>
             </td>
-            <td class="muted">{{ n.createdAt | date:'dd MMM yyyy, HH:mm' }}</td>
+            <td class="muted">{{ n.createdAt + 'Z' | date:'dd MMM yyyy, HH:mm' }}</td>
           </tr>
           <tr *ngIf="sentNotifications.length === 0">
             <td colspan="6" class="empty-row">No notifications sent yet.</td>

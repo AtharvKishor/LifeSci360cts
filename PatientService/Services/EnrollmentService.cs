@@ -153,7 +153,11 @@ public class EnrollmentService : IEnrollmentService
         EnrollmentId     = e.EnrollmentId,
         PatientId        = e.PatientId,
         PatientName      = e.Patient?.Name ?? string.Empty,
+<<<<<<< Updated upstream
         PatientEmail     = e.Patient?.ContactInfo,
+=======
+        PatientEmail     = e.Patient?.ContactInfo ?? string.Empty,
+>>>>>>> Stashed changes
         ProtocolSiteId   = e.ProtocolSiteId,
         ProtocolTitle    = e.ProtocolSite?.Protocol?.Title ?? string.Empty,
         SiteName         = e.ProtocolSite?.Site?.Name ?? string.Empty,

@@ -102,16 +102,18 @@
   (back)="backToSamples()">
 </app-labresult>
 
-<!-- Create Sample Panel -->
-<div class="overlay" *ngIf="showCreatePanel" (click)="closeCreatePanel()"></div>
-<div class="enroll-panel" [class.open]="showCreatePanel">
-  <div class="panel-head">
-    <div><h3>New Sample</h3><p>Record a newly collected biological sample.</p></div>
-    <button class="close-btn" (click)="closeCreatePanel()">
-      <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-    </button>
-  </div>
-  <form [formGroup]="createForm" (ngSubmit)="submitCreate()" class="panel-form">
+<!-- Create Sample Modal -->
+<div class="modal-backdrop" [class.open]="showCreatePanel" (click)="closeCreatePanel()">
+  <div class="modal" style="max-width:560px" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title">
+        <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"/></svg>
+        New Sample
+      </div>
+      <div (click)="closeCreatePanel()" class="modal-close-btn">&times;</div>
+    </div>
+    <div class="modal-body">
+  <form [formGroup]="createForm" (ngSubmit)="submitCreate()" id="createSampleForm">
     <div class="panel-alert success" *ngIf="createSuccess">
       <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
       {{ createSuccess }}
@@ -141,7 +143,7 @@
           type="text"
           [(ngModel)]="enrollmentSearch"
           [ngModelOptions]="{standalone:true}"
-          placeholder="Search by patient name or protocol..."
+          placeholder="Search by name, email or protocol..."
           (focus)="enrollmentDropdownOpen = true"
           (input)="enrollmentDropdownOpen = true"
           (blur)="enrollmentDropdownOpen = false"
@@ -169,8 +171,12 @@
             [style.border-bottom]="last ? 'none' : '1px solid #f5f3ef'"
             onmouseover="this.style.background='#f5f3ef'" onmouseout="this.style.background=''">
             <div style="font-size:13px;font-weight:600;color:#1a1a1a;">{{ e.patientName }}</div>
+<<<<<<< Updated upstream
             <div style="font-size:12px;color:#6b7280;margin-top:2px;">{{ e.protocolTitle }} &middot; {{ e.siteName }}</div>
             <div *ngIf="e.patientEmail" style="font-size:11px;color:#9ca3af;margin-top:1px;">{{ e.patientEmail }}</div>
+=======
+            <div style="font-size:12px;color:#6b7280;margin-top:2px;">{{ e.patientEmail }} &middot; {{ e.protocolTitle }}</div>
+>>>>>>> Stashed changes
           </div>
         </div>
       </div>
@@ -185,26 +191,30 @@
       <span class="ferr" *ngIf="createForm.get('collectedDate')?.touched && createForm.get('collectedDate')?.errors?.['required']">Collection date is required.</span>
       <span class="ferr" *ngIf="createForm.get('collectedDate')?.touched && createForm.get('collectedDate')?.errors?.['futureDate']">Collection date cannot be a future date.</span>
     </div>
-    <div class="panel-actions">
+    </form>
+    </div>
+    <div class="modal-footer">
       <button type="button" class="btn-cancel" (click)="closeCreatePanel()">Cancel</button>
-      <button type="submit" class="btn-submit" [disabled]="createForm.invalid || createLoading">
+      <button type="submit" form="createSampleForm" class="btn-submit" [disabled]="createForm.invalid || createLoading">
         <span class="spinner-sm" *ngIf="createLoading"></span>
         <span>{{ createLoading ? 'Saving...' : 'Create Sample' }}</span>
       </button>
     </div>
-  </form>
+  </div>
 </div>
 
-<!-- Edit Sample Panel -->
-<div class="overlay" *ngIf="showEditPanel" (click)="closeEditPanel()"></div>
-<div class="enroll-panel" [class.open]="showEditPanel">
-  <div class="panel-head">
-    <div><h3>Edit Sample</h3></div>
-    <button class="close-btn" (click)="closeEditPanel()">
-      <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-    </button>
-  </div>
-  <form [formGroup]="editForm" (ngSubmit)="submitEdit()" class="panel-form">
+<!-- Edit Sample Modal -->
+<div class="modal-backdrop" [class.open]="showEditPanel" (click)="closeEditPanel()">
+  <div class="modal" style="max-width:480px" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title">
+        <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg>
+        Edit Sample
+      </div>
+      <div (click)="closeEditPanel()" class="modal-close-btn">&times;</div>
+    </div>
+    <div class="modal-body">
+  <form [formGroup]="editForm" (ngSubmit)="submitEdit()" id="editSampleForm">
     <div class="panel-alert success" *ngIf="editSuccess">
       <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
       {{ editSuccess }}
@@ -217,26 +227,30 @@
       <label>Sample Type</label>
       <input type="text" formControlName="sampleType" placeholder="e.g. Blood, Plasma, Urine..."/>
     </div>
-    <div class="panel-actions">
+    </form>
+    </div>
+    <div class="modal-footer">
       <button type="button" class="btn-cancel" (click)="closeEditPanel()">Cancel</button>
-      <button type="submit" class="btn-submit" [disabled]="editLoading">
+      <button type="submit" form="editSampleForm" class="btn-submit" [disabled]="editLoading">
         <span class="spinner-sm" *ngIf="editLoading"></span>
         <span>{{ editLoading ? 'Saving...' : 'Save Changes' }}</span>
       </button>
     </div>
-  </form>
+  </div>
 </div>
 
-<!-- Update Status Panel -->
-<div class="overlay" *ngIf="showStatusPanel" (click)="closeStatusPanel()"></div>
-<div class="enroll-panel enroll-panel--sm" [class.open]="showStatusPanel">
-  <div class="panel-head">
-    <div><h3>Update Status</h3><p>{{ statusSample?.sampleType }}</p></div>
-    <button class="close-btn" (click)="closeStatusPanel()">
-      <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-    </button>
-  </div>
-  <form [formGroup]="statusForm" (ngSubmit)="submitStatus()" class="panel-form">
+<!-- Update Status Modal -->
+<div class="modal-backdrop" [class.open]="showStatusPanel" (click)="closeStatusPanel()">
+  <div class="modal" style="max-width:420px" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title">
+        <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        Update Status — {{ statusSample?.sampleType }}
+      </div>
+      <div (click)="closeStatusPanel()" class="modal-close-btn">&times;</div>
+    </div>
+    <div class="modal-body">
+  <form [formGroup]="statusForm" (ngSubmit)="submitStatus()" id="statusSampleForm">
     <div class="panel-alert success" *ngIf="statusSuccess">
       <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
       {{ statusSuccess }}
@@ -251,12 +265,14 @@
         <option *ngFor="let st of sampleStatuses" [value]="st">{{ st }}</option>
       </select>
     </div>
-    <div class="panel-actions">
+    </form>
+    </div>
+    <div class="modal-footer">
       <button type="button" class="btn-cancel" (click)="closeStatusPanel()">Cancel</button>
-      <button type="submit" class="btn-submit" [disabled]="statusForm.invalid || statusLoading">
+      <button type="submit" form="statusSampleForm" class="btn-submit" [disabled]="statusForm.invalid || statusLoading">
         <span class="spinner-sm" *ngIf="statusLoading"></span>
         <span>{{ statusLoading ? 'Updating...' : 'Update Status' }}</span>
       </button>
     </div>
-  </form>
+  </div>
 </div>

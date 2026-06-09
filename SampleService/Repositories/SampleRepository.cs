@@ -93,8 +93,15 @@ public class SampleRepository : ISampleRepository
 
     public async Task<bool> UpdateStatusAsync(Guid id, string status)
     {
-        Sample? sample = await _db.Samples.FindAsync(id);
+        Sample? sample = await _db.Samples
+            .Include(s => s.LabResults)
+            .FirstOrDefaultAsync(s => s.SampleId == id);
         if (sample == null) return false;
+
+        // Business rule: TESTED or ANALYZED require at least one lab result
+        if ((status == "TESTED" || status == "ANALYZED") && !sample.LabResults.Any())
+            throw new InvalidOperationException(
+                $"Cannot mark sample as {status} — no lab results recorded yet. Add at least one lab result first.");
 
         sample.Status = status;
         await _db.SaveChangesAsync();

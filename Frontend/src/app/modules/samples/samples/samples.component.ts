@@ -140,7 +140,11 @@ export class SamplesComponent implements OnInit {
     const q = this.enrollmentSearch.toLowerCase().trim();
     return this.enrollments.filter(e =>
       e.enrollmentStatus === 'ACTIVE' &&
-      (!q || e.patientName.toLowerCase().includes(q) || e.protocolTitle.toLowerCase().includes(q) || e.siteName.toLowerCase().includes(q))
+      (!q ||
+        e.patientName.toLowerCase().includes(q) ||
+        (e.patientEmail ?? '').toLowerCase().includes(q) ||   // email search
+        e.protocolTitle.toLowerCase().includes(q) ||
+        e.siteName.toLowerCase().includes(q))
     );
   }
 
@@ -237,6 +241,9 @@ export class SamplesComponent implements OnInit {
         next: () => {
           const idx = this.samples.findIndex(s => s.sampleId === this.statusSample?.sampleId);
           if (idx !== -1) this.samples[idx] = { ...this.samples[idx], status };
+          // Also update selectedSample so notes card refreshes immediately
+          if (this.selectedSample?.sampleId === this.statusSample?.sampleId)
+            this.selectedSample = { ...this.selectedSample!, status } as typeof this.selectedSample;
           this.statusSuccess = `Status updated to "${status}".`;
           this.cdr.detectChanges();
           setTimeout(() => { this.showStatusPanel = false; this.statusSample = null; this.statusSuccess = ''; this.cdr.detectChanges(); }, 1800);

@@ -48,7 +48,7 @@
           </thead>
           <tbody>
             <tr *ngFor="let log of filteredAuditLogs">
-              <td class="muted audit-time">{{ log.createdAt | date:'dd MMM yyyy, HH:mm:ss' }}</td>
+              <td class="muted audit-time">{{ log.createdAt + 'Z' | date:'dd MMM yyyy, HH:mm:ss' }}</td>
               <td>
                 <span class="action-badge"
                   [style.background]="serviceColor(log.serviceName)"

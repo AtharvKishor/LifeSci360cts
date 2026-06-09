@@ -22,6 +22,9 @@ public partial class LabResult
     [StringLength(255)]
     public string ResultValue { get; set; } = null!;
 
+    [StringLength(50)]
+    public string? ResultStatus { get; set; }
+
     [Precision(0)]
     public DateTime ResultDate { get; set; }
 

@@ -95,8 +95,15 @@ public class SamplesController : ControllerBase
     [Authorize(Roles = "LAB_TECHNICIAN,RESEARCH_SCIENTIST,ADMIN,SYSTEM_ADMIN")]
     public async Task<ActionResult<ApiResponse<string>>> UpdateStatus(Guid id, [FromBody] string status)
     {
-        bool ok = await _service.UpdateStatusAsync(id, status);
-        if (!ok) return NotFound(ApiResponse<string>.Fail("Sample not found."));
+        try
+        {
+            bool ok = await _service.UpdateStatusAsync(id, status);
+            if (!ok) return NotFound(ApiResponse<string>.Fail("Sample not found."));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<string>.Fail(ex.Message));
+        }
 
         _audit.Log(new AuditLogCreateDto
         {

@@ -122,14 +122,9 @@ export class ProtocolVisits implements OnInit {
 
   // ── Enrollment window calculations ──
   get enrollmentWindowEnd(): Date | null {
-    if (!this.selectedProtocol?.startDate || !this.selectedProtocol?.endDate) return null;
-    const start = new Date(this.selectedProtocol.startDate);
-    const end   = new Date(this.selectedProtocol.endDate);
-    const durationDays = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
-    const windowDays   = Math.floor(durationDays * 0.10);
-    const windowEnd    = new Date(start);
-    windowEnd.setDate(start.getDate() + windowDays);
-    return windowEnd;
+    if (!this.selectedProtocol?.endDate) return null;
+    // Enrollment allowed until protocol end date
+    return new Date(this.selectedProtocol.endDate);
   }
 
   get isEnrollmentOpen(): boolean {

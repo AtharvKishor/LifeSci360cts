@@ -40,7 +40,7 @@ public class NotificationRepository(ServicesDbContext db) : INotificationReposit
         await db.Notifications
             .CountAsync(n => n.UserId == userId && n.Channel == "IN_APP" && n.Status == "UNREAD");
 
-    // â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    
 
     public async Task<List<NotificationDto>> AddRangeAsync(IEnumerable<Notification> notifications)
     {
