@@ -55,6 +55,9 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<AuditLogDbContext>();
     db.Database.EnsureCreated(); // creates the DB itself if it doesn't exist
     db.Database.ExecuteSqlRaw(AuditLogService.API.Data.AuditLogsBootstrap.Sql);
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 }
 

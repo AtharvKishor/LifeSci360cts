@@ -103,7 +103,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors();
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 // app.UseHttpsRedirection(); // removed — causes redirect issues in local dev
+=======
+// app.UseHttpsRedirection(); // Disabled – Angular uses http://localhost:5054
+>>>>>>> Stashed changes
 =======
 // app.UseHttpsRedirection(); // Disabled – Angular uses http://localhost:5054
 >>>>>>> Stashed changes
